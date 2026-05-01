@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useDropdownPosition — Visual Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --accent: #6c63ff;
+    --accent2: #00e5a0;
+    --accent3: #ff6b6b;
+    --amber: #f5a623;
+    --text: #e8e8f0;
+    --text2: #8888a0;
+    --text3: #555568;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Tajawal', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: .5;
+  }
+
+  /* ── GRID LINES ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    margin-bottom: 72px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.25);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    letter-spacing: -.02em;
+  }
+
+  .header h1 span {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: .85em;
+  }
+
+  .header-sub {
+    color: var(--text2);
+    font-size: 15px;
+    max-width: 540px;
+    line-height: 1.7;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .meta-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+  }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CONCEPT BOX ── */
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .concept-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .concept-card h3 {
+    font-size: 13px;
+    font-family: var(--mono);
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: .05em;
+  }
+
+  .concept-card p {
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: .88em;
+    background: rgba(108,99,255,0.12);
+    color: #a8a4ff;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* ── CASE CARDS ── */
+  .cases-grid {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  .case-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+
+  .case-card:hover { border-color: var(--border2); }
+
+  .case-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .case-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .case-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .case-badge {
+    margin-right: auto;
+    margin-left: 0;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .badge-ok    { color: var(--accent2); border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.07); }
+  .badge-warn  { color: var(--amber);   border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.07); }
+  .badge-error { color: var(--accent3); border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.07); }
+
+  .case-body {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 640px) {
+    .case-body { grid-template-columns: 1fr; }
+  }
+
+  /* ── VIEWPORT SIMULATOR ── */
+  .sim-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    position: relative;
+  }
+
+  .sim-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 10px;
+    letter-spacing: .08em;
+  }
+
+  .sim-viewport {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .sim-viewport-inner {
+    position: relative;
+    height: 130px;
+  }
+
+  .vp-edge-left, .vp-edge-right {
+    position: absolute;
+    top: 0; bottom: 0; width: 2px;
+    z-index: 3;
+  }
+  .vp-edge-left  { left: 0;  background: rgba(255,107,107,0.7); }
+  .vp-edge-right { right: 0; background: rgba(255,107,107,0.7); }
+
+  .sim-btn {
+    position: absolute;
+    top: 20px;
+    height: 28px;
+    background: rgba(108,99,255,0.2);
+    border: 1px solid rgba(108,99,255,0.5);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #a8a4ff;
+    z-index: 2;
+    white-space: nowrap;
+    padding: 0 8px;
+  }
+
+  .sim-dropdown {
+    position: absolute;
+    top: 60px;
+    height: 55px;
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    z-index: 2;
+    white-space: nowrap;
+    padding: 0 8px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .dd-normal {
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.4);
+    color: var(--accent2);
+  }
+
+  .dd-overflow {
+    background: rgba(255,107,107,0.08);
+    border: 1px dashed rgba(255,107,107,0.5);
+    color: var(--accent3);
+  }
+
+  .dd-clamped {
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.4);
+    color: var(--amber);
+  }
+
+  /* overflow hatch outside viewport */
+  .hatch-overlay {
+    position: absolute;
+    top: 60px; height: 55px;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255,107,107,0.15),
+      rgba(255,107,107,0.15) 3px,
+      transparent 3px,
+      transparent 8px
+    );
+    border: 1px dashed rgba(255,107,107,0.3);
+    z-index: 1;
+    border-radius: 3px;
+  }
+
+  /* outside-vp zone */
+  .outside-zone {
+    background: rgba(255,107,107,0.04);
+    position: absolute;
+    top: 0; bottom: 0;
+  }
+
+  /* ── LOGIC TRACE ── */
+  .logic-trace {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 2;
+  }
+
+  .trace-line {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .trace-line:last-child { border-bottom: none; }
+
+  .trace-n {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .tn-init   { background: rgba(108,99,255,0.2); color: #a8a4ff; }
+  .tn-ok     { background: rgba(0,229,160,0.15); color: var(--accent2); }
+  .tn-hit    { background: rgba(245,166,35,0.15); color: var(--amber); }
+  .tn-skip   { background: rgba(255,255,255,0.04); color: var(--text3); }
+  .tn-fix    { background: rgba(255,107,107,0.12); color: var(--accent3); }
+
+  .trace-txt { color: var(--text2); font-size: 11px; flex: 1; }
+  .trace-txt.hit  { color: var(--amber); }
+  .trace-txt.ok   { color: var(--accent2); }
+  .trace-txt.skip { color: var(--text3); }
+  .trace-txt.fix  { color: var(--accent3); }
+
+  /* ── CLAMP COMPARISON ── */
+  .clamp-section {
+    margin-bottom: 64px;
+  }
+
+  .clamp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 580px) {
+    .clamp-grid { grid-template-columns: 1fr; }
+  }
+
+  .clamp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .clamp-card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .clamp-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .clamp-card-body {
+    padding: 20px;
+  }
+
+  .mini-viewport {
+    position: relative;
+    height: 100px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: var(--bg);
+  }
+
+  .mv-edge-l { position: absolute; top:0; bottom:0; left:0; width:2px; background:rgba(255,107,107,.7); z-index:3; }
+  .mv-edge-r { position: absolute; top:0; bottom:0; right:0; width:2px; background:rgba(255,107,107,.7); z-index:3; }
+
+  .mv-btn {
+    position: absolute;
+    height: 24px;
+    background: rgba(108,99,255,0.2);
+    border: 1px solid rgba(108,99,255,0.4);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; color: #a8a4ff;
+    z-index: 2;
+    padding: 0 6px;
+    top: 14px;
+  }
+
+  .mv-dd {
+    position: absolute;
+    height: 48px;
+    top: 46px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px;
+    padding: 0 6px;
+    text-align: center;
+    line-height: 1.4;
+    z-index: 2;
+  }
+
+  .mv-hatch {
+    position: absolute;
+    top: 46px; height: 48px;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255,107,107,0.2), rgba(255,107,107,0.2) 2px,
+      transparent 2px, transparent 6px
+    );
+    z-index: 1;
+    border-radius: 2px;
+  }
+
+  .clamp-note {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    border-left: 2px solid var(--border2);
+  }
+
+  .clamp-note.note-bad  { border-left-color: var(--accent3); }
+  .clamp-note.note-ok   { border-left-color: var(--accent2); }
+
+  .clamp-note strong { font-weight: 500; }
+  .clamp-note strong.red    { color: var(--accent3); }
+  .clamp-note strong.green  { color: var(--accent2); }
+  .clamp-note strong.amber  { color: var(--amber); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 2;
+    color: var(--text2);
+    overflow-x: auto;
+    margin-bottom: 24px;
+    white-space: pre;
+  }
+
+  .kw  { color: #c792ea; }
+  .fn  { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .num { color: #f78c6c; }
+  .cm  { color: #546e7a; font-style: italic; }
+  .vr  { color: #ffcb6b; }
+  .op  { color: var(--accent2); }
+
+  /* ── FORMULA ── */
+  .formula {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(108,99,255,0.06);
+    border: 1px solid rgba(108,99,255,0.15);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+
+  .formula .eq  { color: var(--text3); }
+  .formula .val { color: var(--accent2); font-weight: 500; }
+  .formula .bad { color: var(--accent3); font-weight: 500; }
+  .formula .good{ color: var(--accent2); font-weight: 500; }
+
+  /* ── SUMMARY TABLE ── */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 40px;
+  }
+
+  .summary-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 16px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .summary-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+    font-size: 13px;
+  }
+
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .summary-table td:first-child {
+    font-family: var(--mono);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .footer-right {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .header       { animation: fadeUp .5s ease both; }
+  .concept-card { animation: fadeUp .5s ease .1s both; }
+  .case-card    { animation: fadeUp .5s ease both; }
+  .case-card:nth-child(1) { animation-delay: .15s; }
+  .case-card:nth-child(2) { animation-delay: .22s; }
+  .case-card:nth-child(3) { animation-delay: .29s; }
+  .clamp-section { animation: fadeUp .5s ease .35s both; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══ HEADER ══ -->
+  <header class="header">
+    <div class="header-tag">useDropdownPosition</div>
+    <h1>الـ hook اللي بيمنع<br><span>overflow</span> في الـ dropdown</h1>
+    <p class="header-sub">
+      شرح بصري كامل للـ cases الأربعة — من الـ case الطبيعي لحد الشاشة الصغيرة جداً، مع توضيح الفرق بين <code>left = -30px</code> و<code>left = 16px</code> بعد الـ clamp.
+    </p>
+    <div class="header-meta">
+      <span class="meta-item"><span class="meta-dot"></span>Next.js 15</span>
+      <span class="meta-item"><span class="meta-dot"></span>Payload CMS</span>
+      <span class="meta-item"><span class="meta-dot"></span>Multi-tenant E-commerce</span>
+    </div>
+  </header>
+
+  <!-- ══ CONCEPT ══ -->
+  <div class="section-title">المفهوم الأساسي</div>
+
+  <div class="concept-card" style="margin-bottom:20px;">
+    <h3>getBoundingClientRect()</h3>
+    <p>
+      بترجعلك إحداثيات الـ element بالنسبة للـ viewport.
+      الـ hook بيستخدم <code>rect.left</code> و<code>rect.right</code> و<code>rect.bottom</code>
+      عشان يحسب فين بالظبط هيحط الـ dropdown تحت الـ button من غير ما يخرج برا الشاشة.
+    </p>
+  </div>
+
+  <div class="code-block"><span class="cm">// الثوابت</span>
+<span class="kw">const</span> <span class="vr">dropdownWidth</span> <span class="op">=</span> <span class="num">240</span>;   <span class="cm">// w-60 = 15rem</span>
+
+<span class="cm">// الـ initial position</span>
+<span class="kw">let</span> <span class="vr">left</span> <span class="op">=</span> <span class="vr">rect</span>.<span class="fn">left</span> <span class="op">+</span> <span class="vr">window</span>.<span class="fn">scrollX</span>;
+<span class="kw">const</span> <span class="vr">top</span>  <span class="op">=</span> <span class="vr">rect</span>.<span class="fn">bottom</span> <span class="op">+</span> <span class="vr">window</span>.<span class="fn">scrollY</span>;
+
+<span class="cm">// Fix 1 — overflow من اليمين</span>
+<span class="kw">if</span> (<span class="vr">left</span> <span class="op">+</span> <span class="vr">dropdownWidth</span> <span class="op">></span> <span class="vr">window</span>.<span class="fn">innerWidth</span>) {
+  <span class="vr">left</span> <span class="op">=</span> <span class="vr">rect</span>.<span class="fn">right</span> <span class="op">+</span> <span class="vr">window</span>.<span class="fn">scrollX</span> <span class="op">-</span> <span class="vr">dropdownWidth</span>;
+
+  <span class="cm">// Fix 2 — fallback لو لسه بيخرج</span>
+  <span class="kw">if</span> (<span class="vr">left</span> <span class="op">></span> <span class="num">0</span>) {
+    <span class="vr">left</span> <span class="op">=</span> <span class="vr">window</span>.<span class="fn">innerWidth</span> <span class="op">-</span> <span class="vr">dropdownWidth</span> <span class="op">-</span> <span class="num">16</span>;
+  }
+
+  <span class="cm">// Fix 3 — clamp — يمنع الخروج من الشمال</span>
+  <span class="kw">if</span> (<span class="vr">left</span> <span class="op"><</span> <span class="num">0</span>) {
+    <span class="vr">left</span> <span class="op">=</span> <span class="num">16</span>;
+  }
+}</div>
+
+  <!-- ══ CASES ══ -->
+  <div class="section-title">الـ Cases</div>
+
+  <div class="cases-grid">
+
+    <!-- CASE 1 -->
+    <div class="case-card">
+      <div class="case-header">
+        <span class="case-number">CASE 01</span>
+        <span class="case-title">الحالة الطبيعية</span>
+        <span class="case-badge badge-ok">no overflow</span>
+      </div>
+      <div class="case-body">
+        <div class="sim-wrap">
+          <div class="sim-label">VIEWPORT = 1000px / BUTTON LEFT = 200px</div>
+          <div class="sim-viewport">
+            <div class="sim-viewport-inner" style="background:rgba(108,99,255,0.03);">
+              <div class="vp-edge-left"></div>
+              <div class="vp-edge-right"></div>
+              <!-- button at ~20% of 1000 = scaled to ~20% -->
+              <div class="sim-btn" style="left:8%;width:10%;">Button</div>
+              <!-- dropdown starts at same left, fits fine -->
+              <div class="sim-dropdown dd-normal" style="left:8%;width:24%;">Dropdown ✓<br>240px</div>
+            </div>
+          </div>
+        </div>
+        <div class="logic-trace">
+          <div class="trace-line">
+            <div class="trace-n tn-init">1</div>
+            <div class="trace-txt">left = rect.left = 200px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-ok">2</div>
+            <div class="trace-txt ok">200 + 240 = 440 &lt; 1000 ✓</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-skip">3</div>
+            <div class="trace-txt skip">if (overflow) → false, skip كل الـ fixes</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-ok">4</div>
+            <div class="trace-txt ok">return { left: 200, top: ... } ✓</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 24px 20px;">
+        <div class="formula">
+          <span>left</span><span class="eq">=</span><span class="val">200px</span>
+          <span class="eq"> | </span>
+          <span>left + dropdown</span><span class="eq">=</span><span class="val">440px</span>
+          <span class="eq">&lt;</span>
+          <span class="val">1000px</span>
+          <span class="good">→ يسع</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 2 -->
+    <div class="case-card">
+      <div class="case-header">
+        <span class="case-number">CASE 02</span>
+        <span class="case-title">overflow من اليمين</span>
+        <span class="case-badge badge-warn">fix 1 active</span>
+      </div>
+      <div class="case-body">
+        <div class="sim-wrap">
+          <div class="sim-label">VIEWPORT = 1000px / BUTTON LEFT = 870px</div>
+          <div class="sim-viewport">
+            <div class="sim-viewport-inner" style="background:rgba(108,99,255,0.03);">
+              <div class="vp-edge-left"></div>
+              <div class="vp-edge-right"></div>
+              <!-- button at 87% -->
+              <div class="sim-btn" style="left:77%;width:10%;">Button</div>
+              <!-- dropdown corrected: right-aligned to button right edge -->
+              <div class="sim-dropdown dd-clamped" style="left:63%;width:24%;">fixed ✓<br>770px</div>
+            </div>
+          </div>
+        </div>
+        <div class="logic-trace">
+          <div class="trace-line">
+            <div class="trace-n tn-init">1</div>
+            <div class="trace-txt">left = rect.left = 870px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-hit">2</div>
+            <div class="trace-txt hit">870 + 240 = 1110 &gt; 1000 → overflow!</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-fix">3</div>
+            <div class="trace-txt fix">left = rect.right − 240 = 970 − 240 = 730px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-skip">4</div>
+            <div class="trace-txt skip">if (left &gt; 0) → 730 &gt; 0 → fallback يتشغّل</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-fix">5</div>
+            <div class="trace-txt fix">left = 1000 − 240 − 16 = 744px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-skip">6</div>
+            <div class="trace-txt skip">if (left &lt; 0) → false, skip</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-ok">7</div>
+            <div class="trace-txt ok">return { left: 744px } ✓</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 24px 20px;">
+        <div class="formula">
+          <span>rect.right</span><span class="eq">=</span><span class="val">970</span>
+          <span class="eq">−</span>
+          <span>240</span>
+          <span class="eq">=</span>
+          <span class="good">730px</span>
+          <span class="eq"> → </span>
+          <span>fallback</span>
+          <span class="eq">=</span>
+          <span class="good">744px</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 3 -->
+    <div class="case-card">
+      <div class="case-header">
+        <span class="case-number">CASE 03</span>
+        <span class="case-title">شاشة صغيرة — الـ clamp يشتغل</span>
+        <span class="case-badge badge-error">all fixes active</span>
+      </div>
+      <div class="case-body">
+        <div class="sim-wrap">
+          <div class="sim-label">VIEWPORT = 220px / BUTTON LEFT = 150px</div>
+          <div class="sim-viewport">
+            <div class="sim-viewport-inner" style="background:rgba(255,107,107,0.03);">
+              <div class="vp-edge-left"></div>
+              <div class="vp-edge-right"></div>
+              <!-- button at 68% of 220 -->
+              <div class="sim-btn" style="left:60%;width:20%;">Btn</div>
+              <!-- dropdown clamped to 16px from left -->
+              <div class="sim-dropdown dd-clamped" style="left:7%;width:80%;">clamped → 16px<br>still overflows right</div>
+              <!-- overflow right hatch -->
+              <div style="position:absolute;top:60px;right:0;width:12%;height:55px;background:repeating-linear-gradient(45deg,rgba(255,107,107,.2),rgba(255,107,107,.2) 2px,transparent 2px,transparent 6px);z-index:1;border-radius:2px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="logic-trace">
+          <div class="trace-line">
+            <div class="trace-n tn-init">1</div>
+            <div class="trace-txt">left = rect.left = 150px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-hit">2</div>
+            <div class="trace-txt hit">150 + 240 = 390 &gt; 220 → overflow!</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-fix">3</div>
+            <div class="trace-txt fix">left = rect.right − 240 = 210 − 240 = −30px</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-skip">4</div>
+            <div class="trace-txt skip">if (left &gt; 0) → −30 &gt; 0 → false, skip fallback</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-hit">5</div>
+            <div class="trace-txt hit">if (left &lt; 0) → −30 &lt; 0 → clamp!</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-fix">6</div>
+            <div class="trace-txt fix">left = 16px ← أقصى ما يمكن</div>
+          </div>
+          <div class="trace-line">
+            <div class="trace-n tn-ok">7</div>
+            <div class="trace-txt ok">16 + 240 = 256 &gt; 220 → يمين بيخرج، لكن ده physical limit</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 24px 20px;">
+        <div class="formula">
+          <span>rect.right − 240</span><span class="eq">=</span><span class="bad">−30px</span>
+          <span class="eq"> → </span>
+          <span>clamp</span>
+          <span class="eq">→</span>
+          <span class="good">16px</span>
+          <span class="eq"> | </span>
+          <span>physical limit: 240 &gt; 220</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end cases-grid -->
+
+  <!-- ══ CLAMP COMPARISON ══ -->
+  <div class="clamp-section">
+    <div class="section-title">الفرق البصري — left = −30px مقابل left = 16px</div>
+
+    <div class="clamp-grid">
+
+      <!-- WITHOUT CLAMP -->
+      <div class="clamp-card">
+        <div class="clamp-card-header">
+          <div class="clamp-dot" style="background:var(--accent3);"></div>
+          <span style="color:var(--accent3);">بدون clamp — left = −30px</span>
+        </div>
+        <div class="clamp-card-body">
+          <div class="mini-viewport">
+            <div class="mv-edge-l"></div>
+            <div class="mv-edge-r"></div>
+            <!-- outside zone (left of viewport) -->
+            <div style="position:absolute;top:0;bottom:0;left:0;width:0;background:rgba(255,107,107,0.06);"></div>
+            <!-- button at right side -->
+            <div class="mv-btn" style="right:8%;width:22%;">Button</div>
+            <!-- dropdown at -30: shifted LEFT of viewport -->
+            <!-- viewport is 100% = e.g. 300px. -30px means 30px outside left. scale: -30/300 = -10% -->
+            <div class="mv-dd dd-overflow" style="left:-10%;width:80%;">Dropdown 240px</div>
+            <!-- hatch for outside part -->
+            <div class="mv-hatch" style="left:0;width:10%;border-radius:0;"></div>
+            <!-- label for cut part -->
+            <div style="position:absolute;top:46px;left:0;width:10%;height:48px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:var(--accent3);z-index:4;writing-mode:vertical-rl;transform:rotate(180deg);">مقطوع</div>
+          </div>
+          <div class="clamp-note note-bad">
+            <strong class="red">30px من اليسار مقطوعة</strong> — المستخدم مش شايفها خالص.<br>
+            الـ browser بيخفي أي حاجة بتطلع من الـ viewport.
+          </div>
+        </div>
+      </div>
+
+      <!-- WITH CLAMP -->
+      <div class="clamp-card">
+        <div class="clamp-card-header">
+          <div class="clamp-dot" style="background:var(--amber);"></div>
+          <span style="color:var(--amber);">مع clamp — left = 16px</span>
+        </div>
+        <div class="clamp-card-body">
+          <div class="mini-viewport">
+            <div class="mv-edge-l"></div>
+            <div class="mv-edge-r"></div>
+            <!-- button -->
+            <div class="mv-btn" style="right:8%;width:22%;">Button</div>
+            <!-- dropdown at 16px from left: 16/300 ≈ 5% -->
+            <div class="mv-dd dd-clamped" style="left:5%;width:80%;">Dropdown 240px</div>
+            <!-- overflow right hatch -->
+            <div class="mv-hatch" style="right:0;width:15%;"></div>
+            <!-- 16px indicator -->
+            <div style="position:absolute;top:46px;left:0;width:5%;height:2px;background:rgba(0,229,160,0.6);z-index:5;"></div>
+            <div style="position:absolute;top:38px;left:1%;font-family:var(--mono);font-size:8px;color:var(--accent2);z-index:5;">16px</div>
+          </div>
+          <div class="clamp-note note-ok">
+            <strong class="green">اليسار محفوظ</strong> — الـ dropdown بيبدأ من 16px آمن.<br>
+            <strong class="amber">اليمين لسه بيخرج</strong> لأن الـ dropdown (240px) أكبر من الشاشة (220px).<br>
+            ده <strong>physical limit</strong> — مفيش حل رياضي يخليه fully visible.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY ══ -->
+  <div class="section-title">ملخص الـ Cases</div>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>الحالة</th>
+        <th>الـ condition</th>
+        <th>النتيجة</th>
+        <th>الـ fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Case 1 — طبيعي</td>
+        <td><code>left + 240 ≤ vp</code></td>
+        <td style="color:var(--accent2);">يسع — لا تدخل</td>
+        <td>لا شيء</td>
+      </tr>
+      <tr>
+        <td>Case 2 — overflow يمين</td>
+        <td><code>left + 240 &gt; vp</code></td>
+        <td style="color:var(--amber);">بيخرج من اليمين</td>
+        <td><code>rect.right − 240</code> → fallback</td>
+      </tr>
+      <tr>
+        <td>Case 3 — شاشة صغيرة</td>
+        <td><code>rect.right − 240 &lt; 0</code></td>
+        <td style="color:var(--accent3);">dropdown أكبر من الشاشة</td>
+        <td>clamp → <code>left = 16px</code></td>
+      </tr>
+      <tr>
+        <td>Physical limit</td>
+        <td><code>dropdownWidth &gt; vp</code></td>
+        <td style="color:var(--text3);">مستحيل fully visible</td>
+        <td>على mobile: استخدم sidebar/drawer بديل</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══ FOOTER ══ -->
+  <div class="footer">
+    <div class="footer-left">useDropdownPosition — Multi-tenant E-commerce</div>
+    <div class="footer-right">Code With Antonio Workshop · Next.js 15 + Payload CMS</div>
+  </div>
+
+</div>
+</body>
+</html>
