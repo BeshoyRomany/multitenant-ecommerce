@@ -11,9 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "payload:types": "bunx payload generate:types",
-    "payload:migrate": "bunx payload migrate",
     "payload:migrate:fresh": "bunx payload migrate:fresh",
-    "payload:migrate:refresh": "bunx payload migrate:refresh"
+    "db:seed": "bun run src/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
