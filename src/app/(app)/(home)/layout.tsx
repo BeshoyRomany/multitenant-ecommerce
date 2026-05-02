@@ -5,6 +5,7 @@ import { SearchFilters } from "./search-filters";
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
 import { Category } from "@/payload-types";
+import { CustomCategory } from "./types";
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -21,15 +22,16 @@ const Layout = async ({ children }: LayoutProps) => {
         exists: false, // this will fetch only the top-level categories that do not have a parent category
       },
     },
+    sort: "name",
   });
 
   //Flat the data
-  const formattedData = data.docs.map((doc) => ({
-    ...doc,
+  const formattedData: CustomCategory[] = data.docs.map((doc) => ({
+    ...doc, // parent level
     subcategories: (doc.subcategories?.docs ?? []).map((doc) => ({
       // Because of "depth 1" we are confident that it will display the full category (doc) object not the string parent
       ...(doc as Category),
-      // subcategories: undefined,
+      subcategories: undefined,
     })),
   }));
 
