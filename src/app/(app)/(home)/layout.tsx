@@ -1,44 +1,27 @@
-import React from "react";
+import React, { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { getQueryClient, HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { Navbar } from "./navbar";
 import { Footer } from "./footer";
-import { SearchFilters } from "./search-filters";
-import configPromise from "@payload-config";
-import { getPayload } from "payload";
-import { Category } from "@/payload-types";
-import { CustomCategory } from "./types";
+import { SearchFilterSkeleton, SearchFilters } from "./search-filters";
 interface LayoutProps {
   children: React.ReactNode;
 }
 const Layout = async ({ children }: LayoutProps) => {
-  const payload = await getPayload({
-    config: configPromise,
-  });
-  const data = await payload.find({
-    collection: "categories",
-    pagination: false, // categories are usually not that many, so we can fetch them all at once
-    depth: 1, //Populate subcategories one level deep
-    where: {
-      parent: {
-        exists: false, // this will fetch only the top-level categories that do not have a parent category
-      },
-    },
-    sort: "name",
-  });
-
-  //Flat the data
-  const formattedData: CustomCategory[] = data.docs.map((doc) => ({
-    ...doc, // parent level
-    subcategories: (doc.subcategories?.docs ?? []).map((doc) => ({
-      // Because of "depth 1" we are confident that it will display the full category (doc) object not the string parent
-      ...(doc as Category),
-      subcategories: undefined,
-    })),
-  }));
+  const queryClient = getQueryClient();
+  prefetch(trpc.categories.getMany.queryOptions());
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <SearchFilters data={formattedData} />
+      <HydrateClient>
+        <ErrorBoundary fallback={<div>Something went wrong</div>}>
+          <Suspense fallback={<SearchFilterSkeleton />}>
+            <SearchFilters />
+          </Suspense>
+        </ErrorBoundary>
+      </HydrateClient>
+
       <div className="flex-1 bg-[#f4f4f0]">{children}</div>
       <Footer />
     </div>

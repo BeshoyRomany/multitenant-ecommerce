@@ -9,7 +9,14 @@ export const useDropdownPosition = (
     const rect = ref.current.getBoundingClientRect();
     const dropdownWidth = 240; //Width of dropdown (w-60 = 15rem = 240px)
 
-    //calculate the initial position
+    //calculate the initial position + scroll
+
+    /* getBoundingClientRect() returns position relative to what you SEE (viewport)
+     scrollX/Y = how much you have scrolled
+     real position = what you see + how much you scrolled
+     example: element at 80px, scrolled 20px right → rect.left = 60px → 60 + 20 = 80px
+     so: dropdown will always appear right below the button even after scrolling 
+    */
     let left = rect.left + window.scrollX;
     const top = rect.bottom + window.scrollY;
 
@@ -25,7 +32,7 @@ export const useDropdownPosition = (
       left = rect.right + window.scrollX - dropdownWidth;
 
       //If still off-screen, align to the right edge of viewport with some padding
-      if (left > 0) {
+      if (left + dropdownWidth > window.innerWidth) {
         left = window.innerWidth - dropdownWidth - 16;
       }
 

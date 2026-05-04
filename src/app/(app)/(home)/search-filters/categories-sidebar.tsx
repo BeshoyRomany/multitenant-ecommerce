@@ -6,22 +6,27 @@ import {
   SheetTitle,
   SheetHeader,
 } from "@/components/ui/sheet";
-import { CategoryItem, CustomCategory, SubCategory } from "../types";
 import { useState } from "react";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { CategoriesGetManyOutput } from "@/modules/categories/types";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  data: CustomCategory[]; //TODO: remove this later
 }
-export const CategoriesSidebar = ({ open, onOpenChange, data }: Props) => {
+export const CategoriesSidebar = ({ open, onOpenChange }: Props) => {
+  const trpc = useTRPC();
+  const { data } = useSuspenseQuery(trpc.categories.getMany.queryOptions());
+
   const router = useRouter();
-  const [parentCategories, setParentCategories] = useState<
-    CustomCategory[] | SubCategory[] | null
+
+  const [parentCategories, setParentCategories] =
+    useState<CategoriesGetManyOutput | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<
+    CategoriesGetManyOutput[number] | null
   >(null);
-  const [selectedCategory, setSelectedCategory] =
-    useState<CustomCategory | null>(null);
 
   //If we have parent categories, show those, otherwise show root categories
   const currentCategories = parentCategories ?? data ?? [];
@@ -32,10 +37,10 @@ export const CategoriesSidebar = ({ open, onOpenChange, data }: Props) => {
     onOpenChange(open);
   };
 
-  const handleCategoryClick = (category: CategoryItem) => {
+  const handleCategoryClick = (category: CategoriesGetManyOutput[number]) => {
     if (category.subcategories && category.subcategories.length > 0) {
       //it means that the current category is a parent with a subcategory
-      setParentCategories(category.subcategories);
+      setParentCategories(category.subcategories as CategoriesGetManyOutput);
       //set the current selected category
       setSelectedCategory(category);
     } else {
@@ -86,18 +91,21 @@ export const CategoriesSidebar = ({ open, onOpenChange, data }: Props) => {
               Back
             </button>
           )}
-          {currentCategories.map((category: CategoryItem) => (
-            <button
-              className="w-full text-left  p-4 hover:bg-black hover:text-white flex justify-between items-center text-base font-medium cursor-pointer"
-              key={category.slug}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category.name}
-              {category.subcategories && category.subcategories.length > 0 && (
-                <ChevronRightIcon className="size-4" />
-              )}
-            </button>
-          ))}
+          {currentCategories.map(
+            (category: CategoriesGetManyOutput[number]) => (
+              <button
+                className="w-full text-left  p-4 hover:bg-black hover:text-white flex justify-between items-center text-base font-medium cursor-pointer"
+                key={category.slug}
+                onClick={() => handleCategoryClick(category)}
+              >
+                {category.name}
+                {category.subcategories &&
+                  category.subcategories.length > 0 && (
+                    <ChevronRightIcon className="size-4" />
+                  )}
+              </button>
+            ),
+          )}
         </ScrollArea>
       </SheetContent>
     </Sheet>
