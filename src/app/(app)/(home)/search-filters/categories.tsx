@@ -1,14 +1,14 @@
 "use client";
 import { CategoryDropdown } from "./category-dropdown";
-import { CustomCategory } from "../types";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ListFilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoriesSidebar } from "./categories-sidebar";
+import { CategoriesGetManyOutput } from "@/modules/categories/types";
 
 interface Props {
-  data: CustomCategory[];
+  data: CategoriesGetManyOutput;
 }
 export const Categories = ({ data }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +37,7 @@ export const Categories = ({ data }: Props) => {
     const calculateVisible = () => {
       if (!containerRef.current || !measureRef.current || !viewAllRef.current)
         return;
-      //get the container div width (that will hold the categories)
+      //get the container div width (that will hold the visible only categories)
       const containerWidth = containerRef.current.offsetWidth;
       //get view all button width
       const viewAllWidth = viewAllRef.current.offsetWidth;
@@ -79,18 +79,14 @@ export const Categories = ({ data }: Props) => {
   return (
     <div className="relative w-full">
       {/* Categories sidebar */}
-      <CategoriesSidebar
-        open={isSidebarOpen}
-        onOpenChange={setIsSidebarOpen}
-        data={data}
-      />
+      <CategoriesSidebar open={isSidebarOpen} onOpenChange={setIsSidebarOpen} />
       {/* Hidden dev to Measure all items */}
       <div
         ref={measureRef}
         className="absolute opacity-0 pointer-events-none flex"
         style={{ position: "fixed", top: -9999, left: -9999 }}
       >
-        {data.map((category: CustomCategory) => (
+        {data.map((category: CategoriesGetManyOutput[number]) => (
           <div key={category.id}>
             <CategoryDropdown
               category={category}
@@ -109,15 +105,17 @@ export const Categories = ({ data }: Props) => {
         onMouseEnter={() => setIsAnyHovered(true)}
         onMouseLeave={() => setIsAnyHovered(false)}
       >
-        {data.slice(0, visibleCount).map((category: CustomCategory) => (
-          <div key={category.id}>
-            <CategoryDropdown
-              category={category}
-              isActive={activeCategory === category.slug}
-              isNavigationHovered={isAnyHovered}
-            />
-          </div>
-        ))}
+        {data
+          .slice(0, visibleCount)
+          .map((category: CategoriesGetManyOutput[number]) => (
+            <div key={category.id}>
+              <CategoryDropdown
+                category={category}
+                isActive={activeCategory === category.slug}
+                isNavigationHovered={isAnyHovered}
+              />
+            </div>
+          ))}
         <div ref={viewAllRef} className="shrink-0">
           <Button
             className={cn(
