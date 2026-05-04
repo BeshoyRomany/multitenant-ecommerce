@@ -8,7 +8,6 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 const Layout = async ({ children }: LayoutProps) => {
-  const queryClient = getQueryClient();
   prefetch(trpc.categories.getMany.queryOptions());
 
   return (

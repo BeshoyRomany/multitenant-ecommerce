@@ -20,6 +20,9 @@ export const useDropdownPosition = (
     let left = rect.left + window.scrollX;
     const top = rect.bottom + window.scrollY;
 
+    const viewportLeft = window.scrollX;
+    const viewportRight = window.scrollX + window.innerWidth;
+
     //Check if dropdown would go off the right edge of the viewport
     /*
       Example: Screen 1000px, Button starts at 950px (left), ends at 1010px (right).
@@ -27,13 +30,13 @@ export const useDropdownPosition = (
       Fix: Start from button's right edge (1010) and go back by dropdown width (240).
       Result: 1010 - 240 = 770px. Now the dropdown is fully inside the screen.
     */
-    if (left + dropdownWidth > window.innerWidth) {
+    if (left + dropdownWidth > viewportRight) {
       //Align to right edge of button instead
       left = rect.right + window.scrollX - dropdownWidth;
 
       //If still off-screen, align to the right edge of viewport with some padding
-      if (left + dropdownWidth > window.innerWidth) {
-        left = window.innerWidth - dropdownWidth - 16;
+      if (left + dropdownWidth > viewportRight) {
+        left = viewportRight - dropdownWidth - 16;
       }
 
       //Ensure dropdown doesn't go off left edge
