@@ -90,7 +90,7 @@ export const SigninView = () => {
                   <FormItem>
                     <FormLabel className="text-base">Email</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

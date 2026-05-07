@@ -54,7 +54,6 @@ export const SignupView = () => {
 
   const onSubmit = (values: RegisterInput) => {
     register.mutate(values);
-    console.log(values);
   };
   const username = form.watch("username");
   const usernameErrors = form.formState.errors.username;
@@ -117,7 +116,7 @@ export const SignupView = () => {
                   <FormItem>
                     <FormLabel className="text-base">Email</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

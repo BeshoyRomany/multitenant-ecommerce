@@ -8,8 +8,6 @@ import { registerSchema } from "../schemas";
 export const authRouter = createTRPCRouter({
   session: baseProcedure.query(async ({ ctx }) => {
     const headers = await getHeaders();
-    const headersObject = Object.fromEntries(headers.entries());
-    console.log("My Headers:", headersObject);
     const session = await ctx.db.auth({ headers, canSetHeaders: false });
     return session;
   }),
@@ -103,6 +101,7 @@ export const authRouter = createTRPCRouter({
         value: data.token,
         httpOnly: true,
         path: "/",
+        secure: true,
         //TODO: Ensure cross-domain cookie sharing
         // sameSite: "none",
         //domain: ""
