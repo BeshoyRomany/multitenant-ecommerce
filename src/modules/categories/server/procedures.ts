@@ -21,7 +21,6 @@ export const categoriesRouter = createTRPCRouter({
       subcategories: (doc.subcategories?.docs ?? []).map((doc) => ({
         // Because of "depth 1" we are confident that it will display the full category (doc) object not the string parent
         ...(doc as Category),
-        subcategories: undefined,
       })),
     }));
 

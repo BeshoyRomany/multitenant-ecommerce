@@ -40,9 +40,7 @@ export const CategoriesSidebar = ({ open, onOpenChange }: Props) => {
   const handleCategoryClick = (category: CategoriesGetManyOutput[number]) => {
     if (category.subcategories && category.subcategories.length > 0) {
       //it means that the current category is a parent with a subcategory
-      setParentCategories(
-        category.subcategories as unknown as CategoriesGetManyOutput,
-      );
+      setParentCategories(category.subcategories as CategoriesGetManyOutput);
       //set the current selected category
       setSelectedCategory(category);
     } else {
