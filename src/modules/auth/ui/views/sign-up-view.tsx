@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Poppins } from "next/font/google";
 import { toast } from "sonner";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { registerSchema } from "../../schemas";
 import { RouterInput } from "@/trpc/routers/_app";
@@ -31,10 +31,17 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["700"] });
 export const SignupView = () => {
   const router = useRouter();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  /*
+    NOTE: here in (register) we don't use the RESTapi because, the /api/register it doesn't make a check like: 
+    // Find if the user exist
+      const existingData = await ctx.db.find({ etc... {Username already taken or not}
+  */
   const register = useMutation(
     trpc.auth.register.mutationOptions({
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success("User tenant created successfully");
+        queryClient.invalidateQueries(trpc.auth.session.queryFilter());
         router.push("/");
       },
       onError: (error) => {
