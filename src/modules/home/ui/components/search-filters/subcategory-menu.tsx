@@ -1,8 +1,8 @@
+import { CategoriesGetManyOutput } from "@/modules/categories/types";
 import Link from "next/link";
-import { CategoriesGetManyOutputSingle } from "@/modules/categories/types";
 
 interface Props {
-  category: CategoriesGetManyOutputSingle;
+  category: CategoriesGetManyOutput[number];
   isOpen: boolean;
   position: { top: number; left: number };
 }
