@@ -10,11 +10,16 @@ import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
 import { Categories } from "./collections/Categories";
 import { Products } from "./collections/Products";
-
+import { ar } from "payload/i18n/ar";
+import { en } from "payload/i18n/en";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
+  i18n: {
+    supportedLanguages: { en, ar },
+    fallbackLanguage: "en",
+  },
   admin: {
     user: Users.slug,
     importMap: {
