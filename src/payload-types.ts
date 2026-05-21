@@ -79,6 +79,7 @@ export interface Config {
   collectionsJoins: {
     categories: {
       subcategories: 'categories';
+      products: 'products';
     };
   };
   collectionsSelect: {
@@ -185,6 +186,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  products?: {
+    docs?: (string | Product)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -196,6 +202,13 @@ export interface Product {
   id: string;
   name: string;
   description?: string | null;
+  /**
+   * In USD
+   */
+  price: number;
+  category?: (string | null) | Category;
+  image?: (string | null) | Media;
+  refundPolicy?: ('30-day' | '14-day' | '7-day' | '3-day' | '1-day' | 'no-refunds') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -332,6 +345,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   color?: T;
   parent?: T;
   subcategories?: T;
+  products?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -342,6 +356,10 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
+  price?: T;
+  category?: T;
+  image?: T;
+  refundPolicy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
