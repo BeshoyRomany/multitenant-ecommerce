@@ -19,12 +19,14 @@ export const productsRouter = createTRPCRouter({
       // Min price filter
       if (input.minPrice) {
         where["price"] = {
+          ...where["price"],
           greater_than_equal: input.minPrice,
         };
       }
       // Max price filter
       if (input.maxPrice) {
         where["price"] = {
+          ...where["price"],
           less_than_equal: input.maxPrice,
         };
       }
@@ -77,7 +79,6 @@ export const productsRouter = createTRPCRouter({
           in: allCategorySlugs,
         };
       }
-
       const data = await ctx.db.find({
         collection: "products",
         depth: 1, //Populate "category" & "image"
