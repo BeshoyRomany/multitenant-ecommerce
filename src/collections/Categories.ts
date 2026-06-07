@@ -96,7 +96,7 @@ export const Categories: CollectionConfig = {
       type: "join", // This field is used to create a self-referential relationship for subcategories
       collection: "products",
       on: "category", // Fetches all products where their "category parent Id" field refers to this category's ID.
-      hasMany: true, // A category can have multiple subcategories
+      hasMany: true, // A category can have multiple Products
       label: {
         en: "Products",
         ar: "المنتجات",

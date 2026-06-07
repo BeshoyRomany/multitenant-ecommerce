@@ -8,11 +8,22 @@ export const productsRouter = createTRPCRouter({
     .input(
       z.object({
         category: z.string().nullable().optional(),
+        minPrice: z.number().nullable().optional(),
+        maxPrice: z.number().nullable().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       //Type where to allow us infer (and Where[] | undefined  & or)
       const where: Where = {};
+
+      // Min price filter
+      if (input.minPrice || input.maxPrice) {
+        where["price"] = {
+          ...(input.minPrice ? { greater_than_equal: input.minPrice } : {}),
+          ...(input.maxPrice ? { less_than_equal: input.maxPrice } : {}),
+        };
+      }
+
       if (input.category) {
         // get all categories that slug is equal to [parentCategory.slug, ...subcategories]
         const categoriesData = await ctx.db.find({
@@ -34,17 +45,18 @@ export const productsRouter = createTRPCRouter({
             ...(doc as Category),
           })),
         }));
-        console.log(formattedData);
+        // console.log(formattedData[0].subcategories);
         const parentCategory = formattedData[0]; //Get the category and name it parent always since we only retreive one category (limit 1)
         const subcategoriesSlug: string[] = []; //subcategories slugs stored here
+
         if (parentCategory) {
+          // console.log("Subcategories:", ...parentCategory.subcategories);
           subcategoriesSlug.push(
             ...parentCategory.subcategories.map(
               (subcategory) => subcategory.slug,
             ),
           );
         }
-        console.log(subcategoriesSlug);
         /*
           after we got the parentCategory slug and all subcategories slug we put them in one array
           [parentCategory.slug, ...subcategories] : this is the same as
@@ -54,13 +66,12 @@ export const productsRouter = createTRPCRouter({
         const allCategorySlugs = parentCategory
           ? [parentCategory.slug, ...subcategoriesSlug]
           : [];
-        console.log(allCategorySlugs);
+        // console.log(allCategorySlugs);
         // now use this parent category id to find all products that belong to this category
         where["category.slug"] = {
           in: allCategorySlugs,
         };
       }
-
       const data = await ctx.db.find({
         collection: "products",
         depth: 1, //Populate "category" & "image"
