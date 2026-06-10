@@ -2,6 +2,9 @@ import { CollectionConfig } from "payload";
 
 export const Products: CollectionConfig = {
   slug: "products",
+  admin: {
+    useAsTitle: "name",
+  },
   labels: {
     singular: {
       en: "Product",
@@ -54,6 +57,12 @@ export const Products: CollectionConfig = {
           },
         };
       },
+    },
+    {
+      name: "tags",
+      type: "relationship",
+      relationTo: "tags",
+      hasMany: true,
     },
     {
       name: "image",
