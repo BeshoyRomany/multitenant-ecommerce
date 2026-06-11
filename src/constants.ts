@@ -1,2 +1,2 @@
-export const DEFAULT_PAGINATION_LIMIT = 3;
+export const DEFAULT_PAGINATION_LIMIT = 8;
 export const DEFAULT_PAGINATION_CURSOR = 1;

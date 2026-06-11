@@ -21,7 +21,7 @@ export const TagsFilters = ({ value, onChange }: TagsFilterProps) => {
           // However, React Query (TanStack) only stops fetching if this function returns `undefined`.
           // Using `?? undefined` converts Payload's `null` into `undefined` to safely trigger the brake,
           // preventing React Query from making an unnecessary extra request (e.g., trying to fetch an empty page).
-          getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+          getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined, // React Query will load the next page 2,3,4 etc..
         },
       ),
     );
@@ -65,7 +65,7 @@ export const TagsFilters = ({ value, onChange }: TagsFilterProps) => {
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
         >
-          {isFetchingNextPage ? "Loading more..." : "Load more"}
+          {isFetchingNextPage ? "Loading..." : "Load more"}
         </button>
       )}
     </div>
