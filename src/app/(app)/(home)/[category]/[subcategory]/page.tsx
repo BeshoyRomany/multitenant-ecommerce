@@ -1,23 +1,23 @@
+import { loadProductFilters } from "@/modules/products/search-params";
+import { ProductListView } from "@/modules/products/ui/views/product-list-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
-import {
-  ProductList,
-  ProductListSkeleton,
-} from "@/modules/products/ui/components/product-list";
-import { Suspense } from "react";
+import { SearchParams } from "nuqs/server";
 
 interface Props {
   params: Promise<{
     subcategory: string; // This should be subcategory instead of category, as we are in the [subcategory] page
   }>;
+  searchParams: Promise<SearchParams>;
 }
-const Page = async ({ params }: Props) => {
+const Page = async ({ params, searchParams }: Props) => {
+  const filters = await loadProductFilters(searchParams);
   const { subcategory } = await params;
-  prefetch(trpc.products.getMany.queryOptions({ category: subcategory }));
+  prefetch(
+    trpc.products.getMany.queryOptions({ category: subcategory, ...filters }),
+  );
   return (
     <HydrateClient>
-      <Suspense fallback={<ProductListSkeleton />}>
-        <ProductList category={subcategory} />
-      </Suspense>
+      <ProductListView category={subcategory} />
     </HydrateClient>
   );
 };

@@ -33,13 +33,13 @@ export const ProductFilters = () => {
 
   // const hasAnyFilter = Object.values(filters).some((value) => value !== "");
   const hasAnyFilter = Object.entries(filters).some(([key, value]) => {
-    if (key === "sort") return false; // when it loops and found "sort" -> return false
+    if (key === "sort") return false; // sort: when it loops and found "sort" -> return false
     if (Array.isArray(value)) {
-      return value.length > 0; // tags array if it's length > 0 show clear button
+      return value.length > 0; // tags: tags array if it's length > 0 show clear button
     }
 
     if (typeof value === "string") {
-      return value !== ""; // if the value is a string, check if it's not empty then return true, otherwise return false
+      return value !== ""; //price: if the value is a string, check if it's not empty then return true, otherwise return false
     }
     return value !== null; // if the value is not a string, check if it's not null and it can be any other type then return true, otherwise return false
   });
