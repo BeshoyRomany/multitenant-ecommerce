@@ -50,13 +50,13 @@ export const Products: CollectionConfig = {
       type: "relationship",
       relationTo: "categories",
       hasMany: false,
-      filterOptions: () => {
-        return {
-          parent: {
-            exists: false, // return the category if it doesn't have a parent (main category) to avoid showing subcategories in the category filter options
-          },
-        };
-      },
+      // filterOptions: () => {
+      //   return {
+      //     parent: {
+      //       exists: false, // return the category if it doesn't have a parent (main category) to avoid showing subcategories in the category filter options
+      //     },
+      //   };
+      // },
     },
     {
       name: "tags",

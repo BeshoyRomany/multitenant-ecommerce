@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Features | Funroad - Powerful Ecommerce Solutions",
+  title: "Features | Sellroad - Powerful Ecommerce Solutions",
   description:
-    "Discover the powerful features of Funroad's multitenant ecommerce platform. From advanced analytics to seamless integrations, build your online store with confidence.",
+    "Discover the powerful features of Sellroad's multitenant ecommerce platform. From advanced analytics to seamless integrations, build your online store with confidence.",
   keywords:
-    "features, ecommerce, multitenant, analytics, integrations, online store, funroad",
+    "features, ecommerce, multitenant, analytics, integrations, online store, sellroad",
   openGraph: {
-    title: "Features | Funroad",
+    title: "Features | Sellroad",
     description:
-      "Explore the powerful features that make Funroad the perfect ecommerce platform.",
+      "Explore the powerful features that make Sellroad the perfect ecommerce platform.",
     type: "website",
   },
 };
@@ -127,7 +127,7 @@ const stats = [
 const testimonials = [
   {
     quote:
-      "Funroad transformed our business! The multitenant features allowed us to expand to 5 different markets without any hassle.",
+      "Sellroad transformed our business! The multitenant features allowed us to expand to 5 different markets without any hassle.",
     name: "Sarah Johnson",
     role: "CEO, TechStart Inc.",
     color: "bg-pink-300",
@@ -258,8 +258,8 @@ const Page = () => (
             READY TO EXPERIENCE THE POWER?
           </h2>
           <p className="text-2xl font-bold text-black mb-8">
-            Join thousands of successful businesses using Funroad to power their
-            ecommerce growth!
+            Join thousands of successful businesses using Sellroad to power
+            their ecommerce growth!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button className="px-8 py-6 text-2xl font-black bg-black text-white border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:-translate-y-1 hover:bg-gray-800 transition-all transform rotate-1">

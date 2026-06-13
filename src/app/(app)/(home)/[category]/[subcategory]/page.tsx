@@ -1,3 +1,4 @@
+import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
 import { loadProductFilters } from "@/modules/products/search-params";
 import { ProductListView } from "@/modules/products/ui/views/product-list-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
@@ -13,7 +14,11 @@ const Page = async ({ params, searchParams }: Props) => {
   const filters = await loadProductFilters(searchParams);
   const { subcategory } = await params;
   prefetch(
-    trpc.products.getMany.queryOptions({ category: subcategory, ...filters }),
+    trpc.products.getMany.infiniteQueryOptions({
+      category: subcategory,
+      ...filters,
+      limit: DEFAULT_PAGINATION_LIMIT,
+    }),
   );
   return (
     <HydrateClient>

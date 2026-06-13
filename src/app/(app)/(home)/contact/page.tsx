@@ -5,13 +5,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Funroad - Get in Touch",
+  title: "Contact Us | Sellroad - Get in Touch",
   description:
-    "Reach out to Funroad for inquiries, support, or collaboration. We're here to help with your multitenant ecommerce needs.",
-  keywords: "contact, support, ecommerce, multitenant, funroad",
+    "Reach out to Sellroad for inquiries, support, or collaboration. We're here to help with your multitenant ecommerce needs.",
+  keywords: "contact, support, ecommerce, multitenant, sellroad",
   openGraph: {
-    title: "Contact Us | Funroad",
-    description: "Get in touch with Funroad for your ecommerce solutions.",
+    title: "Contact Us | Sellroad",
+    description: "Get in touch with Sellroad for your ecommerce solutions.",
     type: "website",
   },
 };
@@ -108,9 +108,9 @@ const Page = () => {
                 ✉️ EMAIL US
               </h2>
               <p className="text-lg font-bold text-black">
-                hello@funroad.com
+                hello@sellroad.com
                 <br />
-                support@funroad.com
+                support@sellroad.com
               </p>
             </Card>
 

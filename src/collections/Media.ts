@@ -20,10 +20,6 @@ export const Media: CollectionConfig = {
       name: "alt",
       type: "text",
       required: true,
-      label: {
-        en: "Alt Text",
-        ar: "النص البديل (Alt)",
-      },
     },
   ],
   upload: true,
