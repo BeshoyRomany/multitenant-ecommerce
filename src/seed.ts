@@ -138,6 +138,30 @@ const categories = [
 
 const seed = async () => {
   const payload = await getPayload({ config });
+  // Create initial admin tenant
+  const adminTenant = await payload.create({
+    collection: "tenants",
+    data: {
+      name: "admin",
+      slug: "admin",
+      stripeAccountId: "admin",
+    },
+  });
+  // Create initial admin user
+  await payload.create({
+    collection: "users",
+    data: {
+      email: "admin@sellroad.com",
+      password: "demo",
+      username: "admin",
+      roles: ["super-admin"],
+      tenants: [
+        {
+          tenant: adminTenant.id,
+        },
+      ],
+    },
+  });
 
   //Seed the parent categories only with parent property (null)
   for (const category of categories) {

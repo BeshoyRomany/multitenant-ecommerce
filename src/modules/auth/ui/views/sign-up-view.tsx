@@ -79,7 +79,7 @@ export const SignupView = () => {
                   <span
                     className={cn("text-2xl font-semibold", poppins.className)}
                   >
-                    funroad
+                    sellroad
                   </span>
                 </Link>
                 <Button
@@ -94,7 +94,7 @@ export const SignupView = () => {
                 </Button>
               </div>
               <h1 className="text-4xl font-medium">
-                Join over 2,000 creators earning money on Funroad.
+                Join over 2,000 creators earning money on Sellroad.
               </h1>
               <FormField
                 control={form.control}
@@ -110,7 +110,7 @@ export const SignupView = () => {
                     >
                       Your store will be available at&nbsp;
                       {/* TODO: Use a proper method to generate url */}
-                      <strong>{username}</strong>.funroad.com
+                      <strong>{username}</strong>.sellroad.com
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

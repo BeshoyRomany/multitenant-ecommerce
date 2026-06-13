@@ -3,15 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "About Us | Funroad - Revolutionizing Ecommerce",
+  title: "About Us | Sellroad - Revolutionizing Ecommerce",
   description:
-    "Learn about Funroad's mission to revolutionize multitenant ecommerce. Meet our team, discover our values, and see our journey in transforming online businesses.",
+    "Learn about Sellroad's mission to revolutionize multitenant ecommerce. Meet our team, discover our values, and see our journey in transforming online businesses.",
   keywords:
-    "about, company, team, mission, values, ecommerce, multitenant, funroad",
+    "about, company, team, mission, values, ecommerce, multitenant, sellroad",
   openGraph: {
-    title: "About Us | Funroad",
+    title: "About Us | Sellroad",
     description:
-      "Discover the story behind Funroad and our mission to revolutionize ecommerce.",
+      "Discover the story behind Sellroad and our mission to revolutionize ecommerce.",
     type: "website",
   },
 };
@@ -38,7 +38,7 @@ const team = [
   {
     name: "Emma Davis",
     role: "Head of Customer Success",
-    bio: "Customer advocate with a background in retail. Ensures every Funroad customer achieves their goals.",
+    bio: "Customer advocate with a background in retail. Ensures every Sellroad customer achieves their goals.",
     color: "bg-pink-400",
   },
 ];
@@ -73,7 +73,7 @@ const values = [
 const milestones = [
   {
     year: "2020",
-    event: "Funroad founded with a vision to democratize ecommerce",
+    event: "Sellroad founded with a vision to democratize ecommerce",
   },
   {
     year: "2021",
@@ -207,7 +207,7 @@ const Page = () => (
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-16">
         <h1 className="text-7xl font-black text-black mb-6 transform -rotate-1 bg-white p-8 border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] inline-block">
-          ABOUT FUNROAD
+          ABOUT Sellroad
         </h1>
         <p className="text-2xl font-bold text-black bg-yellow-300 p-6 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] inline-block transform rotate-1 max-w-4xl mx-auto">
           We're on a mission to revolutionize ecommerce by making powerful,

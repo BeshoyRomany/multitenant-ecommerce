@@ -4,12 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans | Funroad - Choose Your Perfect Plan",
+  title: "Pricing Plans | Sellroad - Choose Your Perfect Plan",
   description:
-    "Explore Funroad's flexible pricing plans for multitenant ecommerce. From startups to enterprises, find the perfect solution for your business needs.",
-  keywords: "pricing, plans, ecommerce, multitenant, subscription, funroad",
+    "Explore Sellroad's flexible pricing plans for multitenant ecommerce. From startups to enterprises, find the perfect solution for your business needs.",
+  keywords: "pricing, plans, ecommerce, multitenant, subscription, sellroad",
   openGraph: {
-    title: "Pricing Plans | Funroad",
+    title: "Pricing Plans | Sellroad",
     description: "Choose the perfect pricing plan for your ecommerce business.",
     type: "website",
   },
@@ -194,7 +194,7 @@ const Page = () => {
               READY TO GET STARTED?
             </h2>
             <p className="text-2xl font-bold text-black mb-8">
-              Join thousands of businesses already using Funroad to power their
+              Join thousands of businesses already using Sellroad to power their
               ecommerce success!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
