@@ -29,9 +29,6 @@ export const Tenants: CollectionConfig = {
       name: "image", //each store will have an image
       type: "upload",
       relationTo: "media",
-      admin: {
-        readOnly: true,
-      },
     },
     {
       name: "stripeAccountId",

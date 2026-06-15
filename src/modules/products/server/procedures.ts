@@ -1,4 +1,4 @@
-import { Category, Media } from "@/payload-types";
+import { Category, Media, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Sort, Where } from "payload";
 import z from "zod";
@@ -16,6 +16,7 @@ export const productsRouter = createTRPCRouter({
         maxPrice: z.string().nullable().optional(),
         tags: z.array(z.string()).nullable().optional(),
         sort: z.enum(sortValues).nullable().optional(),
+        tenantSlug: z.string().nullable().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -44,7 +45,13 @@ export const productsRouter = createTRPCRouter({
           ...(input.maxPrice ? { less_than_equal: input.maxPrice } : {}),
         };
       }
-
+      //query by slug name
+      if (input.tenantSlug) {
+        where["tenant.slug"] = {
+          equals: input.tenantSlug,
+        };
+      }
+      //check if there's category in the url
       if (input.category) {
         // get all categories that slug is equal to [parentCategory.slug, ...subcategories]
         const categoriesData = await ctx.db.find({
@@ -100,7 +107,8 @@ export const productsRouter = createTRPCRouter({
       }
       const data = await ctx.db.find({
         collection: "products",
-        depth: 1, //Populate "category" & "image"
+        //Populate "category","image" & "tenant" "tenant.image" Note: depth 2 here for "tenant.image"
+        depth: 2,
         where,
         sort,
         page: input.cursor,
@@ -112,6 +120,12 @@ export const productsRouter = createTRPCRouter({
         docs: data.docs.map((doc) => ({
           ...doc,
           image: doc.image as Media | null,
+          /* 
+            using an intersection (&) to:
+            Force TypeScript to see 'image' as a fully populated Media object | null
+            instead of a string ID, so we can safely access '.url' in the frontend.
+          */
+          tenant: doc.tenant as Tenant & { image: Media | null },
         })),
       };
     }),
