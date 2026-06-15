@@ -1,28 +1,25 @@
-import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
-import { loadProductFilters } from "@/modules/products/search-params";
-import { ProductListView } from "@/modules/products/ui/views/product-list-view";
-import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import type { SearchParams } from "nuqs/server";
-
+import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { ProductListView } from "@/modules/products/ui/views/product-list-view";
+import { loadProductFilters } from "@/modules/products/search-params";
 interface Props {
-  params: Promise<{
-    category: string;
-  }>; // The categories -> Education, Business & money etc...
   searchParams: Promise<SearchParams>; // The query parameters -> price & tags etc...
+  params: Promise<{ slug: string }>; // The categories -> Education, Business & money etc...
 }
 const Page = async ({ params, searchParams }: Props) => {
+  const { slug } = await params;
   const filters = await loadProductFilters(searchParams);
-  const { category } = await params;
   prefetch(
     trpc.products.getMany.infiniteQueryOptions({
-      category: category,
+      tenantSlug: slug,
       ...filters,
       limit: DEFAULT_PAGINATION_LIMIT,
     }),
   );
   return (
     <HydrateClient>
-      <ProductListView category={category} />
+      <ProductListView tenantSlug={slug} narrowView={true} />
     </HydrateClient>
   );
 };
