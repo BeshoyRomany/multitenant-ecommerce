@@ -1,4 +1,4 @@
-import { Category, Media, Tenant } from "@/payload-types";
+import { Category, Media, Product, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Sort, Where } from "payload";
 import z from "zod";
@@ -6,6 +6,25 @@ import { sortValues } from "../search-params";
 import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
 
 export const productsRouter = createTRPCRouter({
+  getOne: baseProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const product = await ctx.db.findByID({
+        collection: "products",
+        id: input.id,
+        depth: 2, //2 -> to populate product.tenant(1).image(2) to access -> url
+      });
+      return {
+        ...product,
+        image: product.image as Media | null,
+        cover: product.cover as Media | null,
+        tenant: product.tenant as Tenant & { image: Media | null },
+      };
+    }),
   getMany: baseProcedure
     .input(
       z.object({
@@ -16,7 +35,7 @@ export const productsRouter = createTRPCRouter({
         maxPrice: z.string().nullable().optional(),
         tags: z.array(z.string()).nullable().optional(),
         sort: z.enum(sortValues).nullable().optional(),
-        tenantSlug: z.string().nullable().optional(),
+        tenantSlug: z.string().nullable().optional(), //TODO: will send from subdomain
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -74,7 +93,7 @@ export const productsRouter = createTRPCRouter({
           })),
         }));
         // console.log(formattedData[0].subcategories);
-        const parentCategory = formattedData[0]; //Get the category and name it parent always since we only retreive one category (limit 1)
+        const parentCategory = formattedData[0]; //Get the category and name it parent always since we only retrieve one category (limit 1)
         const subcategoriesSlug: string[] = []; //subcategories slugs stored here
 
         if (parentCategory) {
@@ -120,6 +139,7 @@ export const productsRouter = createTRPCRouter({
         docs: data.docs.map((doc) => ({
           ...doc,
           image: doc.image as Media | null,
+          cover: doc.cover as Media | null,
           /* 
             using an intersection (&) to:
             Force TypeScript to see 'image' as a fully populated Media object | null
