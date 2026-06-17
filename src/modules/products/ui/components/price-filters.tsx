@@ -1,6 +1,7 @@
 import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatCurrency } from "@/lib/utils";
 interface Props {
   minPrice?: string | null;
   maxPrice?: string | null;
@@ -15,12 +16,7 @@ export const formatAsCurrency = (value: string) => {
   if (!formattedValue) return "";
   const numberValue = parseFloat(formattedValue); // Convert the formatted value to a number
   if (isNaN(numberValue)) return ""; // Handle invalid number input
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0, // Set minimum fraction digits to 0 to avoid displaying cents when not needed
-    maximumFractionDigits: 2, // Set maximum fraction digits to 2 to allow for cents
-  }).format(numberValue); // Format the number as currency
+  return formatCurrency(numberValue);
 };
 
 export const PriceFilters = ({
