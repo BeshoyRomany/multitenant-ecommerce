@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { useCart } from "../../hooks/use-cart";
 import { cn, generateTenantURL } from "@/lib/utils";
-import Link from "next/link";
 import { ShoppingCartIcon } from "lucide-react";
+import Link from "next/link";
+import { useSyncCart } from "../../hooks/use-sync-cart";
 interface CheckoutButtonProps {
   className?: string;
   hideIfEmpty?: boolean;
@@ -14,7 +14,7 @@ export const CheckoutButton = ({
   hideIfEmpty, // You can show the icon even if the cart items === 0
   tenantSlug,
 }: CheckoutButtonProps) => {
-  const { totalItems } = useCart(tenantSlug);
+  const { totalItems } = useSyncCart(tenantSlug); // sync with db
   if (hideIfEmpty && totalItems === 0) return null;
 
   return (
