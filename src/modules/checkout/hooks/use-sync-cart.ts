@@ -4,8 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { useCart } from "./use-cart";
 import { toast } from "sonner";
+import { CheckoutStatesValues, useCheckoutState } from "./use-checkout-states";
 
-export const useSyncCart = (tenantSlug: string) => {
+export const useSyncCart = (
+  tenantSlug: string,
+  states?: CheckoutStatesValues,
+) => {
   const cart = useCart(tenantSlug);
   const trpc = useTRPC();
 
@@ -42,5 +46,6 @@ export const useSyncCart = (tenantSlug: string) => {
     totalDocs: data?.totalDocs,
     isLoading,
     error,
+    trpc,
   };
 };
