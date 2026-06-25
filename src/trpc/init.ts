@@ -1,8 +1,9 @@
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { cache } from "react";
 import superjson from "superjson";
+import { headers as getHeaders } from "next/headers";
 export const createTRPCContext = cache(async () => {
   /**
    * @see: https://trpc.io/docs/server/context
@@ -28,5 +29,23 @@ export const baseProcedure = t.procedure.use(async ({ next }) => {
   });
   // context here will be the payload of each call and extracted it in the procedure to call with await ctx.payload.find({})
   // we do this only one time here in the base procedure -> and we renamed it to {db} instead of direct {payload}
-  return next({ ctx: { db: payload } });
+  return next({ ctx: { db: payload } }); // next (Merge/Extend) the {ctx.db}
+});
+
+// protected procedure based on (baseProcedure) to extend the ctx.db
+export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
+  const headers = await getHeaders();
+  const session = await ctx.db.auth({ headers });
+
+  // check if the user exist
+  if (!session.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "User must be logged in!",
+    });
+  }
+  // Explicitly pass 'user' after the null check to force TypeScript
+  // to infer it as definitely existing (removes the need for '?.' in routers)
+  // so i can use (ctx.session.user.id) inside the router safely
+  return next({ ctx: { ...ctx, session: { user: session.user } } });
 });

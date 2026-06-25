@@ -5,14 +5,60 @@ import { useSyncCart } from "../../hooks/use-sync-cart";
 import { CheckoutItem } from "../components/checkout-item";
 import { CheckoutSidebar } from "../components/checkout-sidebar";
 import { InboxIcon, LoaderIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { useCheckoutState } from "../../hooks/use-checkout-states";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { error } from "console";
+import { toast } from "sonner";
 
 interface CheckoutViewProps {
   tenantSlug: string;
 }
 
 export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
-  const { data, totalPrice, isLoading, totalDocs, removeProduct } =
-    useSyncCart(tenantSlug);
+  const router = useRouter();
+  const [states, setStates] = useCheckoutState();
+  const {
+    data,
+    totalPrice,
+    isLoading,
+    totalDocs,
+    removeProduct,
+    productIds,
+    clearCart,
+    trpc,
+  } = useSyncCart(tenantSlug);
+
+  const purchase = useMutation(
+    trpc.checkout.purchase.mutationOptions({
+      onMutate: () => {
+        setStates({ success: false, cancel: false });
+      },
+      onSuccess: (data) => {
+        //purchase url has been created -> will direct user to payment page
+        window.location.href = data.url;
+      },
+      onError: (error) => {
+        // handle tRPC Error
+        if (error.data?.code === "UNAUTHORIZED") {
+          //TODO: Modify when subdomains enabled
+          router.push("/sign-in");
+        }
+        toast.error(error.message);
+      },
+    }),
+  );
+
+  useEffect(() => {
+    if (states.success) {
+      clearCart();
+      setStates({ success: false, cancel: false });
+      router.push("/products");
+      //TODO: Invalidate library
+    }
+  }, [states.success, clearCart, setStates, router]);
 
   if (isLoading) {
     return (
@@ -58,9 +104,9 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
         <div className="lg:col-span-3">
           <CheckoutSidebar
             total={totalPrice}
-            onCheckout={() => alert("I'm gonna checkout!")}
-            isCanceled={false}
-            isPending={false}
+            onPurchase={() => purchase.mutate({ productIds, tenantSlug })}
+            isCanceled={states.cancel}
+            disabled={purchase.isPending}
           />
         </div>
       </div>
