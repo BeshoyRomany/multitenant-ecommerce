@@ -1,4 +1,5 @@
-import { Category, Media, Product, Tenant } from "@/payload-types";
+import { headers as getHeaders } from "next/headers";
+import { Category, Media, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Sort, Where } from "payload";
 import z from "zod";
@@ -13,13 +14,67 @@ export const productsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      //#region session content example
+      // {
+      //   "authorization": "Bearer token_of_logged_in_user",
+      //   "cookie": "payload-token: eyJhbGciOiJIUzI1...."
+      // }
+
+      //How it works: to know which user is logged in now, through payload will go to mongodb by user data that exist in the token
+
+      //#endregion
+      const headers = await getHeaders();
+      const session = await ctx.db.auth({ headers });
+
       const product = await ctx.db.findByID({
         collection: "products",
         id: input.id,
         depth: 2, //2 -> to populate product.tenant(1).image(2) to access -> url
       });
+
+      let isPurchased = false;
+
+      if (session.user) {
+        const ordersData = await ctx.db.find({
+          collection: "orders",
+          pagination: false,
+          limit: 1,
+          where: {
+            and: [
+              {
+                product: {
+                  equals: input.id,
+                },
+              },
+              {
+                user: {
+                  equals: session.user.id,
+                },
+              },
+            ],
+          },
+        });
+
+        // #region Convert Order Check to Boolean
+        // Purpose: Check if the current user has purchased this product
+        //
+        // Step 1: ordersData.docs[0] returns either an object (order exists) or undefined (no order)
+        // Step 2: First ! converts the value to boolean and inverts it
+        //         - object → false (truthy inverted)
+        //         - undefined → true (falsy inverted)
+        // Step 3: Second ! inverts it again to get the correct boolean value
+        //         - false → true (user HAS purchased)
+        //         - true → false (user HAS NOT purchased)
+        //
+        // Result: isPurchased is always a clean true/false, never an object or undefined
+        // #endregion
+
+        isPurchased = !!ordersData.docs[0];
+      }
+
       return {
         ...product,
+        isPurchased,
         image: product.image as Media | null,
         cover: product.cover as Media | null,
         tenant: product.tenant as Tenant & { image: Media | null },
@@ -133,7 +188,7 @@ export const productsRouter = createTRPCRouter({
         page: input.cursor,
         limit: input.limit,
       });
-      await new Promise((resolver) => setTimeout(resolver, 1000));
+
       return {
         ...data,
         docs: data.docs.map((doc) => ({

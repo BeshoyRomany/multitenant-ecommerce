@@ -20,7 +20,6 @@ interface CartSate {
   addProduct: (tenantSlug: string, productId: string) => void;
   removeProduct: (tenantSlug: string, productId: string) => void;
   clearCart: (tenantSlug: string) => void;
-  getCartByTenant: (tenantSlug: string) => string[];
   clearAllCarts: () => void;
 }
 
@@ -70,8 +69,6 @@ export const useCartStore = create<CartSate>()(
         set({
           tenantCarts: {},
         }),
-      getCartByTenant: (tenantSlug) =>
-        get().tenantCarts[tenantSlug]?.productIds || [],
     }),
     {
       name: "sellroad-cart",

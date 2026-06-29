@@ -34,6 +34,15 @@ export const baseProcedure = t.procedure.use(async ({ next }) => {
 
 // protected procedure based on (baseProcedure) to extend the ctx.db
 export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
+  //#region session content example
+  // {
+  //   "authorization": "Bearer token_of_logged_in_user",
+  //   "cookie": "payload-token: eyJhbGciOiJIUzI1...."
+  // }
+
+  //How it works: to know which user is logged in now, through payload will go to mongodb by user data that exist in the token
+
+  //#endregion
   const headers = await getHeaders();
   const session = await ctx.db.auth({ headers });
 
