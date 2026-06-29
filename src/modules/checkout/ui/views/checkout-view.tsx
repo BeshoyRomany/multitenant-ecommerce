@@ -52,11 +52,12 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
   );
 
   useEffect(() => {
+    console.log("retriggered from CheckoutView");
     if (states.success) {
-      clearCart();
       setStates({ success: false, cancel: false });
-      router.push("/products");
+      clearCart();
       //TODO: Invalidate library
+      router.push("/products");
     }
   }, [states.success, clearCart, setStates, router]);
 

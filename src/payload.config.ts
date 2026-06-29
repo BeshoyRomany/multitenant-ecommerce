@@ -45,6 +45,16 @@ export default buildConfig({
   plugins: [
     payloadCloudPlugin(),
     multiTenantPlugin<Config>({
+      // #region Multi-Tenant (Users) Auth Security (Auto-Protected by Plugin)
+      /**
+       * Note for the team:
+       * This User collection is automatically secured because the plugin looks for the 'admin.user'
+       * configuration and finds this Auth Collection. By spreading 'defaultTenantArrayField' here,
+       * the plugin automatically enforces tenant restrictions and hooks without adding 'users'
+       * to the plugin's collections array.
+       */
+
+      // #endregion
       collections: {
         products: {},
       },

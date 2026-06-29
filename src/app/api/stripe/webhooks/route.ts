@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     );
   }
 
-  console.log("✅ Success", event.id);
+  console.log("✅ Success", event.type);
 
   const permittedEvents: string[] = ["checkout.session.completed"];
 
