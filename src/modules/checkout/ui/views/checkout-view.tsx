@@ -1,23 +1,21 @@
 "use client";
-
 import { generateTenantURL } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { InboxIcon, LoaderIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useCheckoutState } from "../../hooks/use-checkout-states";
 import { useSyncCart } from "../../hooks/use-sync-cart";
 import { CheckoutItem } from "../components/checkout-item";
 import { CheckoutSidebar } from "../components/checkout-sidebar";
-import { InboxIcon, LoaderIcon } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { useTRPC } from "@/trpc/client";
-import { useCheckoutState } from "../../hooks/use-checkout-states";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { error } from "console";
-import { toast } from "sonner";
 
 interface CheckoutViewProps {
   tenantSlug: string;
 }
 
 export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [states, setStates] = useCheckoutState();
   const {
@@ -52,14 +50,20 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
   );
 
   useEffect(() => {
-    console.log("retriggered from CheckoutView");
     if (states.success) {
-      setStates({ success: false, cancel: false });
+      // setStates({ success: false, cancel: false });
       clearCart();
-      //TODO: Invalidate library
-      router.push("/products");
+      queryClient.invalidateQueries(trpc.library.getMany.infiniteQueryFilter());
+      router.push("/library");
     }
-  }, [states.success, clearCart, setStates, router]);
+  }, [
+    states.success,
+    clearCart,
+    setStates,
+    router,
+    queryClient,
+    trpc.library.getMany,
+  ]);
 
   if (isLoading) {
     return (
