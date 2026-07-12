@@ -3,8 +3,68 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import z from "zod";
 
 import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
+import { TRPCError } from "@trpc/server";
+import { code } from "payload/shared";
 
 export const LibraryRouter = createTRPCRouter({
+  //#region get one order product
+  //note: in getOne we should make sure that the product in orders so:
+  //1- get the order that has the passed product id & the current logged in user
+  //2- if the order exist try to get the product from the products collection
+  //#endregion
+  getOne: protectedProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      //make sure that this order exist in the orders by passing the productId, and the current user logged in
+      const ordersData = await ctx.db.find({
+        collection: "orders",
+        pagination: false,
+        where: {
+          and: [
+            {
+              product: {
+                equals: input.productId,
+              },
+            },
+            {
+              user: {
+                equals: ctx.session.user.id,
+              },
+            },
+          ],
+        },
+      });
+
+      const order = ordersData.docs[0];
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      //get the product based on the founded ids
+      const product = await ctx.db.findByID({
+        collection: "products",
+        id: input.productId,
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
+      // Make sure that the product is found that related to this order
+      return product;
+    }),
+
   getMany: protectedProcedure
     .input(
       z.object({
