@@ -2,9 +2,10 @@ import { headers as getHeaders } from "next/headers";
 import { Category, Media, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Sort, Where } from "payload";
-import z from "zod";
+import z, { number } from "zod";
 import { sortValues } from "../search-params";
 import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
+import { totalmem } from "os";
 
 export const productsRouter = createTRPCRouter({
   getOne: baseProcedure
@@ -68,16 +69,90 @@ export const productsRouter = createTRPCRouter({
         //
         // Result: isPurchased is always a clean true/false, never an object or undefined
         // #endregion
-
         isPurchased = !!ordersData.docs[0];
       }
 
+      //Get the reviews records for the current product
+      const reviews = await ctx.db.find({
+        collection: "reviews",
+        pagination: false,
+        where: {
+          product: {
+            equals: product.id,
+          },
+        },
+      });
+
+      //Get the reviews rating
+      //Divide to get the average of the rating by: the accumulated reviews / how many user rate this product
+      //Example: 2 users -> one rate 4 & one rate 1 -> 5 / 2 users = 2.5 rating
+      const reviewsRating =
+        reviews.docs.length > 0
+          ? reviews.docs.reduce((acc, review) => acc + review.rating, 0) /
+            reviews.totalDocs
+          : 0;
+
+      // #region Rating Distribution Calculations
+      // Frequency Counter: Loops through the fetched database reviews,
+      // categorizes each rating (1-5), and increments its counter in memory
+      // to calculate the final breakdown chart for the UI.
+      // #endregion
+      const ratingDistribution: Record<number, number> = {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      };
+
+      //let's assign each rating
+      if (reviews.totalDocs > 0) {
+        reviews.docs.forEach((review) => {
+          const rating = review.rating; // will be the pointer in the ratingDistribution (the rate index)
+          //check & validate if the rating within the range 1 to 5
+          //should be greater than (1) & less than (5)
+          if (rating >= 1 && rating <= 5) {
+            //Assign each reacting to the it's position in the ratingDistribution object
+            // 4 -> how many gave 4
+            // 5 -> how many give 5
+            ratingDistribution[rating] = (ratingDistribution[rating] || 0) + 1;
+            //ratingDistribution[4] value++ 0 gonna be 1
+            //ratingDistribution[5] value++ 0 gonna be 1
+            //another ratingDistribution[5] value++ 1 gonna be 2
+            //etc....
+          }
+          // and always we have rating because the data came from the reviews collection because it has rating for this product
+        });
+
+        //convert to percentage
+        Object.keys(ratingDistribution).forEach((key) => {
+          const rating = Number(key); // get the key convert to number 1,2,3,4,5
+          const count = ratingDistribution[rating] || 0; // get the value for each key & if it's not exist make 0
+
+          // example: 2 users rated 5 stars -> so ratingDistribution[5] = 2
+          // (5 stars key): (2 / 3 total reviews) * 100 = 66.666...
+          // Math.round(66.666...) will equal 67% for progress bar [████████░░] 67%
+
+          // example: 1 user rated 1 star -> so ratingDistribution[1] = 1
+          // (1 star key): (1 / 3 total reviews) * 100 = 33.333...
+          // Math.round(33.333...) will equal 33% for progress bar [███░░░░░░░] 33%
+
+          ratingDistribution[rating] = Math.round(
+            (count / reviews.totalDocs) * 100,
+          );
+          //final example: if ratingDistribution[1] = 4 & we have only 4 totalReviews it will be 4/4 = 1 * 100 = 100% from the 4 user rates with 1 star
+        });
+      }
       return {
         ...product,
-        isPurchased,
         image: product.image as Media | null,
         cover: product.cover as Media | null,
         tenant: product.tenant as Tenant & { image: Media | null },
+        isPurchased,
+        reviews: reviews.totalDocs,
+        reviewsRating,
+        ratingDistribution,
+        reviewCount: reviews.totalDocs,
       };
     }),
   getMany: baseProcedure
@@ -189,9 +264,41 @@ export const productsRouter = createTRPCRouter({
         limit: input.limit,
       });
 
+      //Promise.all for each (product) doc.id we need to get it's reviews
+      const docsWithSummarizedReviews = await Promise.all(
+        data.docs.map(async (doc) => {
+          //get the reviews for each product
+          //query from reviews by product id, the one who add the review that has the (rating & description) is the (user)
+          const reviewsData = await ctx.db.find({
+            collection: "reviews",
+            pagination: false,
+            where: {
+              product: {
+                equals: doc.id,
+              },
+            },
+          });
+          return {
+            ...doc, // return the whole product object
+            reviewCount: reviewsData.totalDocs, // product + with total reviews aggregation we made
+            //reduce() -> collect each review.rating
+            //e.q: each review has rating property it can be from 1 to 5
+            //so review.rating1 = 3 + review.rating2= 4 + review.rating = 2 etc.. all equal 9 rating
+            reviewRating:
+              reviewsData.docs.length === 0
+                ? 0
+                : reviewsData.docs.reduce(
+                    (acc, review) => acc + review.rating,
+                    0,
+                  ) / reviewsData.totalDocs,
+            //divide(/) here which means if i have 10 rating / 2 users(review by user - user gave review for the product) it will be (5 stars)
+            //another example : 5 rating / 2 users(review by user - user gave review for the product) - (2.5 stars)
+          };
+        }),
+      );
       return {
-        ...data,
-        docs: data.docs.map((doc) => ({
+        ...data, // totalDocs, page, hasNextPage, etc...
+        docs: docsWithSummarizedReviews.map((doc) => ({
           ...doc,
           image: doc.image as Media | null,
           cover: doc.cover as Media | null,

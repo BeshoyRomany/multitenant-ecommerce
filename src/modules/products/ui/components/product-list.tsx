@@ -51,8 +51,8 @@ export const ProductList = ({ category, tenantSlug, narrowView }: Props) => {
               imageUrl={product.image?.url} // Media type will convert to object contains (url)
               tenantSlug={product.tenant.slug} // tenant is depth = 1
               tenantImageUrl={product.tenant?.image?.url} // tenant.image depth = 2
-              reviewCount={4.9}
-              reviewRating={3}
+              reviewCount={product.reviewCount}
+              reviewRating={product.reviewRating}
               price={product.price}
             />
           ))}

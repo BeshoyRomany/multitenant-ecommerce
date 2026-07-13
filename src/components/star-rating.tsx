@@ -23,6 +23,7 @@ export const StarRating = ({
        .max = choose the biggest always -> and 0 here if someone put something < 0 it will keep 0
   */
   const safeRating = Math.max(MIN_RATING, Math.min(rating, MAX_RATING));
+  console.log(safeRating);
   const onRating = (value: number) => {
     console.log(value + 1);
   };
