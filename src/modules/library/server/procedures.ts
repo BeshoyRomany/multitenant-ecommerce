@@ -96,9 +96,43 @@ export const LibraryRouter = createTRPCRouter({
           },
         },
       });
+
+      //Promise.all for each (product) doc.id we need to get it's reviews
+      const docsWithSummarizedReviews = await Promise.all(
+        productsData.docs.map(async (doc) => {
+          //get the reviews for each product
+          //query from reviews by product id, the one who add the review that has the (rating & description) is the (user)
+          const reviewsData = await ctx.db.find({
+            collection: "reviews",
+            pagination: false,
+            where: {
+              product: {
+                equals: doc.id,
+              },
+            },
+          });
+          return {
+            ...doc, // return the whole product object
+            reviewCount: reviewsData.totalDocs, // product + with total reviews aggregation we made
+            //reduce() -> collect each review.rating
+            //e.q: each review has rating property it can be from 1 to 5
+            //so review.rating1 = 3 + review.rating2= 4 + review.rating = 2 etc.. all equal 9 rating
+            reviewRating:
+              reviewsData.docs.length === 0
+                ? 0
+                : reviewsData.docs.reduce(
+                    (acc, review) => acc + review.rating,
+                    0,
+                  ) / reviewsData.totalDocs,
+            //divide(/) here which means if i have 10 rating / 2 users(review by user - user gave review for the product) it will be (5 stars)
+            //another example : 5 rating / 2 users(review by user - user gave review for the product) - (2.5 stars)
+          };
+        }),
+      );
+
       return {
         ...productsData,
-        docs: productsData.docs.map((doc) => ({
+        docs: docsWithSummarizedReviews.map((doc) => ({
           ...doc,
           image: doc.image as Media | null,
           cover: doc.cover as Media | null,

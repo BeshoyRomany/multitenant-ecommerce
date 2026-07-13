@@ -1,17 +1,16 @@
 "use client";
-
-// TODO: Add real ratings
 import { StarRating } from "@/components/star-rating";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { formatCurrency, generateTenantURL } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { LinkIcon, StarIcon } from "lucide-react";
+import { CheckIcon, LinkIcon, StarIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment } from "react";
-import dynamic from "next/dynamic";
+import { Fragment, useState } from "react";
+import { toast } from "sonner";
 
 const CartButton = dynamic(
   () => import("../components/cart-button").then((mod) => mod.CartButton),
@@ -31,6 +30,7 @@ interface ProductViewProps {
 }
 
 export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
+  const [isCopied, setIsCopied] = useState(false);
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
     trpc.products.getOne.queryOptions({ id: productId }),
@@ -83,16 +83,21 @@ export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
               </div>
 
               <div className="hidden lg:flex px-6 py-4 items-center justify-center">
-                <div className="flex items-center gap-1">
-                  <StarRating rating={4} />
+                <div className="flex items-center gap-2">
+                  <StarRating rating={data.reviewsRating} />
+                  <p className="text-base font-medium">
+                    ({data.reviewCount}) ratings
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="block lg:hidden px-6 py-4 items-center justify-center border-b">
-              <div className="flex items-center gap-1">
-                <StarRating rating={4} />
-                <p className="text-base font-medium">({243}) ratings</p>
+              <div className="flex items-center gap-2">
+                <StarRating rating={data.reviewsRating} />
+                <p className="text-base font-medium">
+                  ({data.reviewCount}) ratings
+                </p>
               </div>
             </div>
 
@@ -119,10 +124,18 @@ export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
                   <Button
                     className="size-12"
                     variant="elevated"
-                    onClick={() => {}}
-                    disabled={false}
+                    onClick={() => {
+                      setIsCopied(true);
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("URL copied to clipboard");
+
+                      setTimeout(() => {
+                        setIsCopied(false);
+                      }, 1000);
+                    }}
+                    disabled={isCopied}
                   >
-                    <LinkIcon />
+                    {isCopied ? <CheckIcon /> : <LinkIcon />}
                   </Button>
                 </div>
                 <p className="text-center font-medium">
@@ -136,19 +149,27 @@ export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
                   <h3 className="text-xl font-medium">Ratings</h3>
                   <div className="flex items-center gap-x-1 font-medium">
                     <StarIcon className="size-4 fill-black" />
-                    <p>({5})</p>
-                    <p className="text-base">{5} ratings</p>
+                    <p>({data.reviewsRating})</p>
+                    <p className="text-base">{data.reviewCount} ratings</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-[auto_1fr_auto] gap-3 mt-4">
-                  {[5, 4, 3, 2, 1].map((stars) => (
-                    <Fragment key={stars}>
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <Fragment key={star}>
                       <div className="font-medium">
-                        {stars} {stars === 1 ? "star" : "stars"}
+                        {star} {star === 1 ? "star" : "stars"}
                       </div>
-                      <Progress value={stars} className="h-lh" />
-                      <div className="font-medium">{0}%</div>
+                      {/* pass star for the object -> data.ratingDistribution[key] as a key
+                       * to find the right index ratings for each iteration here
+                       */}
+                      <Progress
+                        value={data.ratingDistribution[star]} // example 2/3 * 100 ( 2 ratings for 4 stars / 3 reviews)
+                        className="h-lh"
+                      />
+                      <div className="font-medium">
+                        {data.ratingDistribution[star]}%
+                      </div>
                     </Fragment>
                   ))}
                 </div>
