@@ -1,5 +1,5 @@
 import { headers as getHeaders } from "next/headers";
-import { Category, Media, Tenant } from "@/payload-types";
+import { Category, Media, Review, Tenant } from "@/payload-types";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import type { Sort, Where } from "payload";
 import z, { number } from "zod";
@@ -254,9 +254,12 @@ export const productsRouter = createTRPCRouter({
           in: input.tags,
         };
       }
+
+      // =======================================================================
+      // STEP 1: Fetch Products from Database
+      // =======================================================================
       const data = await ctx.db.find({
         collection: "products",
-        //Populate "category","image" & "tenant" "tenant.image" Note: depth 2 here for "tenant.image"
         depth: 2,
         where,
         sort,
@@ -264,46 +267,95 @@ export const productsRouter = createTRPCRouter({
         limit: input.limit,
       });
 
-      //Promise.all for each (product) doc.id we need to get it's reviews
-      const docsWithSummarizedReviews = await Promise.all(
-        data.docs.map(async (doc) => {
-          //get the reviews for each product
-          //query from reviews by product id, the one who add the review that has the (rating & description) is the (user)
-          const reviewsData = await ctx.db.find({
-            collection: "reviews",
-            pagination: false,
-            where: {
-              product: {
-                equals: doc.id,
-              },
-            },
-          });
-          return {
-            ...doc, // return the whole product object
-            reviewCount: reviewsData.totalDocs, // product + with total reviews aggregation we made
-            //reduce() -> collect each review.rating
-            //e.q: each review has rating property it can be from 1 to 5
-            //so review.rating1 = 3 + review.rating2= 4 + review.rating = 2 etc.. all equal 9 rating
-            reviewRating:
-              reviewsData.docs.length === 0
-                ? 0
-                : reviewsData.docs.reduce(
-                    (acc, review) => acc + review.rating,
-                    0,
-                  ) / reviewsData.totalDocs,
-            //divide(/) here which means if i have 10 rating / 2 users(review by user - user gave review for the product) it will be (5 stars)
-            //another example : 5 rating / 2 users(review by user - user gave review for the product) - (2.5 stars)
-          };
-        }),
+      // =======================================================================
+      // STEP 2: Extract all Product IDs into an array
+      // Output example: productIds = ["6a2d702b...", "6b8f910a..."]
+      // =======================================================================
+      const productIds = data.docs.map((doc) => doc.id);
+
+      // =======================================================================
+      // STEP 3: Fetch ALL reviews for ALL products in ONE single DB query
+      // Real Data Shape of (allReviewsData.docs):
+      // [
+      //   { id: '6a5403...', rating: 4, product: { id: '6a2d702b...' }, description: 'good product' },
+      //   { id: '6a53da...', rating: 1, product: { id: '6a2d702b...' }, description: 'not good' }
+      // ]
+      // =======================================================================
+      const allReviewsData = await ctx.db.find({
+        collection: "reviews",
+        pagination: false,
+        where: {
+          product: {
+            in: productIds,
+          },
+        },
+      });
+
+      // =======================================================================
+      // STEP 4: Group the raw reviews into a lookup drawer object (The Reduce)
+      // Real Data Shape of (reviewsByProductId):
+      // {
+      //   '6a2d702b9445316046fc90f2': [
+      //      { id: '6a5403...', rating: 4, description: 'good product' },
+      //      { id: '6a53da...', rating: 1, description: 'not good' }
+      //   ]
+      // }
+      // =======================================================================
+      const reviewsByProductId = allReviewsData.docs.reduce(
+        (acc, review) => {
+          // 1. Get the Product ID to use as our Key
+          const productId =
+            typeof review.product === "object" && review.product !== null
+              ? (review.product as any).id
+              : String(review.product);
+
+          // 2. Check if the Key exists. If it's 'undefined', create the Key right now!
+          if (!acc[productId]) {
+            acc[productId] = [];
+          }
+
+          // 3. Now that the Key and Array definitely exist, safely push the review inside
+          acc[productId].push(review);
+          return acc;
+        },
+        {} as Record<string, typeof allReviewsData.docs>,
       );
+
+      // =======================================================================
+      // STEP 5: Map products and calculate stats instantly from memory
+      // We look up reviews using: reviewsByProductId[doc.id] (No DB hits here)
+      // =======================================================================
+      const docsWithSummarizedReviews = data.docs.map((doc) => {
+        // Pull reviews from our grouped object, default to [] if product has no reviews
+        const productReviews = reviewsByProductId[doc.id] || [];
+        const reviewCount = productReviews.length;
+
+        // Calculate average: sum all ratings, then divide by total count
+        const reviewRating =
+          reviewCount === 0
+            ? 0
+            : productReviews.reduce(
+                (sumAcc, review) => sumAcc + (review.rating || 0),
+                0,
+              ) / reviewCount;
+
+        return {
+          ...doc, // Keep all original product fields
+          reviewCount, // Add the total reviews count
+          reviewRating, // Add the calculated average stars
+        };
+      });
+
+      // =======================================================================
+      // STEP 6: Final Formatting & TypeScript Type Assertion for Frontend
+      // =======================================================================
       return {
-        ...data, // totalDocs, page, hasNextPage, etc...
+        ...data, // Retain original pagination meta (totalDocs, page, hasNextPage, etc...)
         docs: docsWithSummarizedReviews.map((doc) => ({
           ...doc,
           image: doc.image as Media | null,
           cover: doc.cover as Media | null,
-          /* 
-            using an intersection (&) to:
+          /* using an intersection (&) to:
             Force TypeScript to see 'image' as a fully populated Media object | null
             instead of a string ID, so we can safely access '.url' in the frontend.
           */

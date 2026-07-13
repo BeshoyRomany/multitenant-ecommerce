@@ -84,8 +84,10 @@ export const LibraryRouter = createTRPCRouter({
           },
         },
       });
+
       //try to get all productIds that related to this user that we found in the order collection in db
       const productIds = ordersData.docs.map((order) => order.product);
+
       //get the product based on the founded ids
       const productsData = await ctx.db.find({
         collection: "products",
@@ -97,39 +99,81 @@ export const LibraryRouter = createTRPCRouter({
         },
       });
 
-      //Promise.all for each (product) doc.id we need to get it's reviews
-      const docsWithSummarizedReviews = await Promise.all(
-        productsData.docs.map(async (doc) => {
-          //get the reviews for each product
-          //query from reviews by product id, the one who add the review that has the (rating & description) is the (user)
-          const reviewsData = await ctx.db.find({
-            collection: "reviews",
-            pagination: false,
-            where: {
-              product: {
-                equals: doc.id,
-              },
-            },
-          });
-          return {
-            ...doc, // return the whole product object
-            reviewCount: reviewsData.totalDocs, // product + with total reviews aggregation we made
-            //reduce() -> collect each review.rating
-            //e.q: each review has rating property it can be from 1 to 5
-            //so review.rating1 = 3 + review.rating2= 4 + review.rating = 2 etc.. all equal 9 rating
-            reviewRating:
-              reviewsData.docs.length === 0
-                ? 0
-                : reviewsData.docs.reduce(
-                    (acc, review) => acc + review.rating,
-                    0,
-                  ) / reviewsData.totalDocs,
-            //divide(/) here which means if i have 10 rating / 2 users(review by user - user gave review for the product) it will be (5 stars)
-            //another example : 5 rating / 2 users(review by user - user gave review for the product) - (2.5 stars)
-          };
-        }),
+      // =======================================================================
+      // STEP 1: Fetch ALL reviews for ALL target products in ONE single DB query
+      // Real Data Shape of (allReviewsData.docs):
+      // [
+      //   { id: '6a5403...', rating: 5, product: '6a2d702b...' },
+      //   { id: '6a53da...', rating: 3, product: '6a2d702b...' }
+      // ]
+      // =======================================================================
+      const allReviewsData = await ctx.db.find({
+        collection: "reviews",
+        pagination: false,
+        where: {
+          product: {
+            in: productIds,
+          },
+        },
+      });
+
+      // =======================================================================
+      // STEP 2: Group the reviews by Product ID using .reduce()
+      // Real Data Shape of (reviewsByProductId):
+      // {
+      //   '6a2d702b9445316046fc90f2': [
+      //      { id: '6a5403...', rating: 5 },
+      //      { id: '6a53da...', rating: 3 }
+      //   ]
+      // }
+      // =======================================================================
+      const reviewsByProductId = allReviewsData.docs.reduce(
+        (acc, review) => {
+          // Extract product ID key dynamically
+          const productId =
+            typeof review.product === "object" && review.product !== null
+              ? (review.product as any).id
+              : String(review.product);
+
+          // 👉 THE KEY IS CREATED HERE if it's the first time we see this productId
+          if (!acc[productId]) {
+            acc[productId] = [];
+          }
+
+          // Push the current review safely into its product key drawer
+          acc[productId].push(review);
+          return acc;
+        },
+        {} as Record<string, typeof allReviewsData.docs>,
       );
 
+      // =======================================================================
+      // STEP 3: Map through products and pull summaries instantly from memory
+      // =======================================================================
+      const docsWithSummarizedReviews = productsData.docs.map((doc) => {
+        // Look up our grouped object, default to [] if product has no reviews
+        const productReviews = reviewsByProductId[doc.id] || [];
+        const reviewCount = productReviews.length;
+
+        // Calculate average: sum all ratings, then divide by total count
+        const reviewRating =
+          reviewCount === 0
+            ? 0
+            : productReviews.reduce(
+                (sumAcc, review) => sumAcc + (review.rating || 0),
+                0,
+              ) / reviewCount;
+
+        return {
+          ...doc, // Keep all original product fields
+          reviewCount, // Add total reviews count
+          reviewRating, // Add calculated average stars
+        };
+      });
+
+      // =======================================================================
+      // STEP 4: Final Formatting & TypeScript Type Assertion
+      // =======================================================================
       return {
         ...productsData,
         docs: docsWithSummarizedReviews.map((doc) => ({
