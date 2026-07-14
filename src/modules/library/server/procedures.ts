@@ -159,10 +159,12 @@ export const LibraryRouter = createTRPCRouter({
         const reviewRating =
           reviewCount === 0
             ? 0
-            : productReviews.reduce(
-                (sumAcc, review) => sumAcc + (review.rating || 0),
-                0,
-              ) / reviewCount;
+            : Math.round(
+                productReviews.reduce(
+                  (sumAcc, review) => sumAcc + (review.rating || 0),
+                  0,
+                ) / reviewCount,
+              );
 
         return {
           ...doc, // Keep all original product fields

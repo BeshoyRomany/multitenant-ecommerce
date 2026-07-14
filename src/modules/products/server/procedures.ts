@@ -88,8 +88,10 @@ export const productsRouter = createTRPCRouter({
       //Example: 2 users -> one rate 4 & one rate 1 -> 5 / 2 users = 2.5 rating
       const reviewsRating =
         reviews.docs.length > 0
-          ? reviews.docs.reduce((acc, review) => acc + review.rating, 0) /
-            reviews.totalDocs
+          ? Math.round(
+              reviews.docs.reduce((acc, review) => acc + review.rating, 0) /
+                reviews.totalDocs,
+            )
           : 0;
 
       // #region Rating Distribution Calculations
@@ -334,10 +336,12 @@ export const productsRouter = createTRPCRouter({
         const reviewRating =
           reviewCount === 0
             ? 0
-            : productReviews.reduce(
-                (sumAcc, review) => sumAcc + (review.rating || 0),
-                0,
-              ) / reviewCount;
+            : Math.round(
+                productReviews.reduce(
+                  (sumAcc, review) => sumAcc + (review.rating || 0),
+                  0,
+                ) / reviewCount,
+              );
 
         return {
           ...doc, // Keep all original product fields
