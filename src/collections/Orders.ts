@@ -1,9 +1,17 @@
-import type { CollectionConfig } from "payload";
+import { isSuperAdmin } from "@/lib/access";
+import { Tenant } from "@/payload-types";
+import type { CollectionConfig, Where } from "payload";
 
 export const Orders: CollectionConfig = {
   slug: "orders",
   admin: {
     useAsTitle: "name",
+  },
+  access: {
+    read: ({ req: { user } }) => isSuperAdmin(user),
+    create: ({ req: { user } }) => isSuperAdmin(user),
+    update: ({ req: { user } }) => isSuperAdmin(user),
+    delete: ({ req: { user } }) => isSuperAdmin(user),
   },
   fields: [
     {
@@ -32,6 +40,9 @@ export const Orders: CollectionConfig = {
       name: "stripeCheckoutSessionId",
       type: "text",
       required: true,
+      admin: {
+        description: "Stripe checkout session associated with this order",
+      },
     },
   ],
 };

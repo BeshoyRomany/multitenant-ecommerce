@@ -18,6 +18,7 @@ import { Tags } from "./collections/Tags";
 import { Tenants } from "./collections/Tenants";
 import { Orders } from "./collections/Orders";
 import { Reviews } from "./collections/Reviews";
+import { isSuperAdmin } from "./lib/access";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
@@ -66,16 +67,14 @@ export default buildConfig({
 
       // #endregion
       collections: {
-        products: {},
+        products: {}, // will add tenant Field into the "products" collection
       },
       tenantsArrayField: {
         includeDefaultField: false /* false here 
         because i added in the users collection manually ->
         ...(defaultTenantArrayField) */,
       },
-      userHasAccessToAllTenants: (user) => {
-        return Boolean(user?.roles?.includes("super-admin"));
-      },
+      userHasAccessToAllTenants: (user) => isSuperAdmin(user),
     }),
     // storage-adapter-placeholder
   ],

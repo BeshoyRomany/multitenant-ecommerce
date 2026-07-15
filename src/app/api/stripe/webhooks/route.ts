@@ -65,7 +65,10 @@ export async function POST(req: Request) {
           data = event.data.object as Stripe.Checkout.Session;
 
           if (!data.metadata?.userId) {
-            throw new Error("User ID is required");
+            throw new Error("Missing userId in Stripe session metadata!");
+          }
+          if (!data.metadata?.tenantId) {
+            throw new Error("Missing tenantId in Stripe session metadata!");
           }
 
           const user = await (
