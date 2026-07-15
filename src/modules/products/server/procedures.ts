@@ -31,6 +31,11 @@ export const productsRouter = createTRPCRouter({
         collection: "products",
         id: input.id,
         depth: 2, //2 -> to populate product.tenant(1).image(2) to access -> url
+        select: {
+          //don't retrieve the content field from the API , content will never leak from the server
+          //the user didn't purchased yet
+          content: false,
+        },
       });
 
       let isPurchased = false;
@@ -267,6 +272,11 @@ export const productsRouter = createTRPCRouter({
         sort,
         page: input.cursor,
         limit: input.limit,
+        select: {
+          //don't retrieve the content field from the API , content will never leak from the server
+          //the user didn't purchased yet
+          content: false,
+        },
       });
 
       // =======================================================================

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
+import { isSuperAdmin } from "@/lib/access";
 
 const defaultTenantArrayField = tenantsArrayField({
   // Name of the main array field stored in the user's document
@@ -14,19 +15,30 @@ const defaultTenantArrayField = tenantsArrayField({
   // Controls CRUD permissions for the outer array field itself -> the whole tenants CRUD
   arrayFieldAccess: {
     read: () => true,
-    create: () => true,
-    update: () => true,
+    create: ({ req: { user } }) => isSuperAdmin(user),
+    update: ({ req: { user } }) => isSuperAdmin(user),
   },
 
   // Controls CRUD permissions for the inner tenant relationship field -> the dropdown item CRUD
   tenantFieldAccess: {
     read: () => true,
-    create: () => true,
-    update: () => true,
+    create: ({ req: { user } }) => isSuperAdmin(user),
+    update: ({ req: { user } }) => isSuperAdmin(user),
   },
 });
 export const Users: CollectionConfig = {
   slug: "users",
+  access: {
+    read: () => true, // WARNING: This allows PUBLIC (unauthenticated) access to read ALL users in the system.
+    // If you want users to ONLY read their own profiles, you should use a query constraint instead.
+    create: ({ req: { user } }) => isSuperAdmin(user), // Only accounts defined as Super Admins can create new users
+    delete: ({ req: { user } }) => isSuperAdmin(user), // Only accounts defined as Super Admins can create new users
+    update: ({ req, id }) => {
+      // Super Admin can update anyone; otherwise, a logged-in user can only update their own document
+      if (isSuperAdmin(req.user)) return true;
+      return req.user?.id === id;
+    },
+  },
   labels: {
     singular: {
       en: "User",
@@ -39,6 +51,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     useAsTitle: "email",
+    hidden: ({ user }) => !isSuperAdmin(user), // Only super-admin role can see the users collection
   },
   auth: true,
   fields: [
@@ -62,9 +75,7 @@ export const Users: CollectionConfig = {
       hasMany: true,
       options: ["super-admin", "user"],
       access: {
-        update: ({ req: { user } }) => {
-          return Boolean(user?.roles?.includes("super-admin"));
-        },
+        update: ({ req: { user } }) => isSuperAdmin(user),
       },
     },
     {
