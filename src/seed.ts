@@ -1,5 +1,6 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { stripe } from "./lib/stripe";
 const categories = [
   {
     name: "All",
@@ -138,13 +139,17 @@ const categories = [
 
 const seed = async () => {
   const payload = await getPayload({ config });
+  //create a stripe account for the new users as admin
+  //the account will be empty has no data, just response with only (id) i will connect it to the tenant on creation.
+  //the admin user later will click on a button to make the onboarding
+  const adminAccount = await stripe.accounts.create({});
   // Create initial admin tenant
   const adminTenant = await payload.create({
     collection: "tenants",
     data: {
       name: "admin",
       slug: "admin",
-      stripeAccountId: "admin",
+      stripeAccountId: adminAccount.id,
     },
   });
   // Create initial admin user
