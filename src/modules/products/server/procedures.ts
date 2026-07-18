@@ -6,6 +6,7 @@ import z, { number } from "zod";
 import { sortValues } from "../search-params";
 import { DEFAULT_PAGINATION_LIMIT } from "@/constants";
 import { totalmem } from "os";
+import { TRPCError } from "@trpc/server";
 
 export const productsRouter = createTRPCRouter({
   getOne: baseProcedure
@@ -219,6 +220,13 @@ export const productsRouter = createTRPCRouter({
             slug: { equals: input.category }, // get category based on slug from url parameter
           },
         });
+
+        if (!categoriesData.docs.length) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Category not found",
+          });
+        }
         //Flat the data
         const formattedData = categoriesData.docs.map((doc) => ({
           // doc parent

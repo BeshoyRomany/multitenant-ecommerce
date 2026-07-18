@@ -52,7 +52,10 @@ export async function POST(req: Request) {
 
   console.log("✅ Success", event.type);
 
-  const permittedEvents: string[] = ["checkout.session.completed"];
+  const permittedEvents: string[] = [
+    "checkout.session.completed",
+    "account.updated",
+  ];
 
   const payload = getPayload({ config });
 
@@ -63,12 +66,9 @@ export async function POST(req: Request) {
       switch (event.type) {
         case "checkout.session.completed":
           data = event.data.object as Stripe.Checkout.Session;
-
+          console.log("Account: ", { account: event.account });
           if (!data.metadata?.userId) {
             throw new Error("Missing userId in Stripe session metadata!");
-          }
-          if (!data.metadata?.tenantId) {
-            throw new Error("Missing tenantId in Stripe session metadata!");
           }
 
           const user = await (
@@ -88,17 +88,32 @@ export async function POST(req: Request) {
             to grab the actual product details (name, metadata, etc.) for provisioning.
            */
           // #endregion
+
+          // Fetch the complete details of the checkout session using its ID
           const expandedSession = await stripe.checkout.sessions.retrieve(
             data.id,
             {
               // #region Why this specific expand path?
               /*
-               Even though we send 'price_data' and 'product_data' during creation,
-               Stripe internally converts them into formal 'price' and 'product' objects.
-               This path follows Stripe's response structure to access the generated product metadata.
+                Even though we send 'price_data' and 'product_data' during creation,
+                Stripe internally converts them into formal 'price' and 'product' objects.
+                This path follows Stripe's response structure to access the generated product metadata.
+              */
+              // #endregion
+
+              // Tell Stripe to deeply unpack related objects so we can read the product metadata directly
+              expand: ["line_items.data.price.product"],
+            },
+            {
+              // The specific connected merchant's Stripe Account ID where this session took place
+              // #region Why explicitly pass stripeAccount here?
+              /*
+               / Stripe isolates data per merchant account. Even though the Session ID is unique,
+               / the SDK queries our main platform account by default. We must pass 'event.account'
+               / as a header to tell Stripe's API to look inside that specific merchant's database.
                */
               // #endregion
-              expand: ["line_items.data.price.product"],
+              stripeAccount: event.account, //the merchant id passed from the procedure
             },
           );
 
@@ -123,12 +138,47 @@ export async function POST(req: Request) {
               collection: "orders",
               data: {
                 stripeCheckoutSessionId: data.id, // the original session id
+                stripeAccountId: event.account, // The merchant ID passed from the procedure -> returned in the event -> saved to link the order to the correct merchant
                 user: user.id, // the founded user in the database
                 product: item.price.product.metadata.id, //we will save in db as we send it from procedure
                 name: item.price.product.name, //we will save in db as we send it from procedure
               },
             });
           }
+          break;
+        case "account.updated":
+          data = event.data.object as Stripe.Account;
+
+          (await payload).update({
+            collection: "tenants",
+            where: {
+              stripeAccountId: {
+                equals: data.id,
+              },
+            },
+            data: {
+              // #region STRIPE ACCOUNT UPDATE WEBHOOK HANDLING
+
+              //💡 WHY ARE WE TRACKING ACCOUNT UPDATES & "details_submitted"?
+
+              // Context:
+              // When a user updates their Stripe Express/Custom account, Stripe triggers an "account.updated" event.
+              // If a user "loses their verification", Stripe sets `data.details_submitted` back to `false`.
+
+              // What does "Losing Verification" mean in Stripe?
+              // 1. Document Expiration: The merchant's uploaded ID or Passport expires.
+              // 2. Critical Info Changes: Changing the legal business name, tax ID, or bank country triggers a re-verification.
+              // 3. Volume Thresholds: Passing certain anti-money laundering (AML) sales limits (e.g., $20k+ in volume)
+              //    forces Stripe to demand deeper documentation (e.g., proof of address, company registration).
+              // Impact on our App:
+              // By syncing `data.details_submitted` immediately to our "tenants" collection in Payload CMS,
+              // we ensure our database mirrors Stripe instantly. If they lose verification, we immediately
+              // restrict their selling capabilities on our frontend until they fix it in their Stripe Dashboard.
+
+              // #endregion
+              stripeDetailsSubmitted: data.details_submitted,
+            },
+          });
           break;
         default:
           throw new Error(`Unhandled event: ${event.type}`);

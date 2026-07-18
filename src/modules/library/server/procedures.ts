@@ -62,7 +62,7 @@ export const LibraryRouter = createTRPCRouter({
       }
 
       // Make sure that the product is found that related to this order
-      return product;
+      return product; // return the full product + the content here because it should appear in the library
     }),
 
   getMany: protectedProcedure

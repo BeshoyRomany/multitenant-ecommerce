@@ -39,7 +39,7 @@ export const Tenants: CollectionConfig = {
       relationTo: "media",
     },
     {
-      name: "stripeAccountId", //Populated by stripe
+      name: "stripeAccountId", //Populated by stripe // merchant stripe id
       type: "text",
       required: true,
       access: {

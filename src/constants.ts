@@ -1,2 +1,3 @@
 export const DEFAULT_PAGINATION_LIMIT = 8;
 export const DEFAULT_PAGINATION_CURSOR = 1;
+export const PLATFORM_FEE_PERCENTAGE = 10;

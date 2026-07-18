@@ -1,9 +1,10 @@
-import z from "zod";
-import { headers as getHeaders, cookies as getCookies } from "next/headers";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
+import { headers as getHeaders } from "next/headers";
+import z from "zod";
 import { registerSchema } from "../schemas";
 import { generateAuthCookie } from "../utils";
+import { stripe } from "@/lib/stripe";
 
 export const authRouter = createTRPCRouter({
   session: baseProcedure.query(async ({ ctx }) => {
@@ -32,13 +33,25 @@ export const authRouter = createTRPCRouter({
           message: "Username already taken",
         });
 
+      //create a stripe account for the new users
+      //the account will be empty has no data, just only (id) i will connect it to the tenant on creation.
+      //the user later will click on a button to make the onboarding
+      const account = await stripe.accounts.create({});
+
+      // Validate if the stripe account created
+      if (!account) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Failed to create a stripe account",
+        });
+      }
       //proceed & create tenant
       const tenant = await ctx.db.create({
         collection: "tenants",
         data: {
           name: input.username,
           slug: input.username,
-          stripeAccountId: "test",
+          stripeAccountId: account.id,
         },
       });
 

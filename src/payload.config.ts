@@ -32,6 +32,10 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      // Add custom component to sidebar, #StripeVerify specifies the exported component name within the file
+      beforeNavLinks: ["@/components/stripe-verify#StripeVerify"],
+    },
   },
   collections: [
     Users,

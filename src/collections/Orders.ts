@@ -44,5 +44,19 @@ export const Orders: CollectionConfig = {
         description: "Stripe checkout session associated with this order",
       },
     },
+    // #region Why Save stripeAccountId?
+    /*
+     * We save the merchant's Stripe Account ID alongside the order
+     * so that in the future, if we need to retrieve this session or process
+     * a refund, we can prove to Stripe which connected account to look inside.
+     */
+    // #endregion
+    {
+      name: "stripeAccountId",
+      type: "text",
+      admin: {
+        description: "Stripe account associated with this order",
+      },
+    },
   ],
 };
