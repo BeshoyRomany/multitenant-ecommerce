@@ -62,6 +62,14 @@ export const productsRouter = createTRPCRouter({
           },
         });
 
+        //Don't load the isArchived product profile page
+        if (product.isArchived) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Product not found",
+          });
+        }
+
         // #region Convert Order Check to Boolean
         // Purpose: Check if the current user has purchased this product
         //
@@ -163,6 +171,7 @@ export const productsRouter = createTRPCRouter({
         reviewCount: reviews.totalDocs,
       };
     }),
+
   getMany: baseProcedure
     .input(
       z.object({
@@ -178,7 +187,19 @@ export const productsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       //Type where to allow us infer (and Where[] | undefined  & or)
-      const where: Where = {};
+      const where: Where = {
+        // apply archive on (getMany) because in getOne already exist because we already opened it by clicking it
+        // but if we archived one product it already we should not load it in (getOne)
+        isArchived: {
+          // #region Why 'not_equals: true'?
+          /*
+           / Because we want 'false' AND 'undefined' (legacy/null) data.
+           / Smart, safe, and zero data loss!
+           */
+          // #endregion
+          not_equals: true,
+        },
+      };
       let sort: Sort;
 
       switch (input.sort) {
@@ -204,8 +225,17 @@ export const productsRouter = createTRPCRouter({
       }
       //query by slug name
       if (input.tenantSlug) {
+        // (inside tenant)
+        // if we have tenant means that we are into a tenant
         where["tenant.slug"] = {
           equals: input.tenantSlug,
+        };
+      } else {
+        // (inside storefront)
+        // else here means that we are in the storefront so -> render all product except the private products inside the tenants
+        // These products are exclusively private to the tenant store
+        where["isPrivate"] = {
+          not_equals: true,
         };
       }
       //check if there's category in the url
@@ -249,6 +279,7 @@ export const productsRouter = createTRPCRouter({
             ),
           );
         }
+
         /*
           after we got the parentCategory slug and all subcategories slug we put them in one array
           [parentCategory.slug, ...subcategories] : this is the same as
@@ -261,9 +292,11 @@ export const productsRouter = createTRPCRouter({
         // console.log(allCategorySlugs);
         // now use this parent category id to find all products that belong to this category
         where["category.slug"] = {
+          //example: get the products for the parent and it's subCategories -> if im in the Parent Category URL
           in: allCategorySlugs,
         };
       }
+      // Check if there's tag selected in the url by nuqs state
       if (input.tags && input.tags.length > 0) {
         where["tags.name"] = {
           in: input.tags,
@@ -276,7 +309,7 @@ export const productsRouter = createTRPCRouter({
       const data = await ctx.db.find({
         collection: "products",
         depth: 2,
-        where,
+        where, // (where) filter by ->[ isArchived, price, tenant.slug, isPrivate, category.slug, tags.name]
         sort,
         page: input.cursor,
         limit: input.limit,

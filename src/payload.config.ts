@@ -1,7 +1,7 @@
 // storage-adapter-import-placeholder
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { payloadCloudPlugin } from "@payloadcms/payload-cloud";
-import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { lexicalEditor, UploadFeature } from "@payloadcms/richtext-lexical";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import type { Config, User } from "./payload-types";
 import path from "path";
@@ -48,7 +48,31 @@ export default buildConfig({
     Reviews,
   ],
   // cookiePrefix: "funraod", // by default it will be "payload-token"
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      UploadFeature({
+        collections: {
+          media: {
+            // #region Payload CMS Upload Custom Fields
+            /*
+                   / WARNING: These are NOT the base fields of the 'media' collection itself.
+                   / These are contextual, inline block fields embedded directly within the Rich Text JSON.
+                   / They allow merchants to add item-specific meta (e.g., custom Alt Text or Captions)
+                   / for this specific image instance inside the description editor.
+                   */
+            // #endregion
+            fields: [
+              {
+                name: "alt",
+                type: "text",
+              },
+            ],
+          },
+        },
+      }),
+    ],
+  }),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
