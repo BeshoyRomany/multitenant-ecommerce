@@ -18,38 +18,22 @@ export const Products: CollectionConfig = {
       const tenant = user?.tenants?.[0]?.tenant as Tenant;
       return Boolean(tenant?.stripeDetailsSubmitted);
     },
+    delete: ({ req: { user } }) => isSuperAdmin(user),
   },
   admin: {
     useAsTitle: "name",
     description: "You must verify your account before creating products",
   },
-  labels: {
-    singular: {
-      en: "Product",
-      ar: "منتج",
-    },
-    plural: {
-      en: "Products",
-      ar: "المنتجات",
-    },
-  },
+
   fields: [
     {
       name: "name",
       type: "text",
       required: true,
-      label: {
-        en: "Product Name",
-        ar: "اسم المنتج",
-      },
     },
     {
       name: "description",
-      type: "text",
-      label: {
-        en: "Description",
-        ar: "الوصف",
-      },
+      type: "richText",
     },
     {
       name: "price",
@@ -108,11 +92,29 @@ export const Products: CollectionConfig = {
        */
       // #endregion
       name: "content",
-      //TODO: Change to RichText
-      type: "textarea",
+      type: "richText",
       admin: {
         description:
           "Protective content only visible to customer after purchase. Add product documentation, downloadable files, getting started guides and bonus materials. Supports Markdown formatting",
+      },
+    },
+    {
+      name: "isArchived",
+      label: "Archive",
+      defaultValue: false,
+      type: "checkbox",
+      admin: {
+        description: "If checked, this product will be archived",
+      },
+    },
+    {
+      name: "isPrivate",
+      label: "Private",
+      defaultValue: false,
+      type: "checkbox",
+      admin: {
+        description:
+          "If checked, this product will not be shown on public storefront",
       },
     },
   ],

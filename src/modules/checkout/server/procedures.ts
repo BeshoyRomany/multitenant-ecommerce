@@ -90,15 +90,30 @@ export const checkoutRouter = createTRPCRouter({
                 equals: input.tenantSlug,
               },
             },
+            {
+              isArchived: {
+                // checkout and go to purchase page as long as the product not archived
+                //#region Race Condition Handling: Product Archived During Checkout
+                // Scenario:
+                // 1. User has products in cart and triggers the purchase procedure.
+                // 2. Concurrently, the merchant archives one of these products.
+                // 3. This query filters out the archived product using 'not_equals: true'.
+                // 4. The length validation below (totalDocs !== productIds.length) will fail
+                //    because the archived product is missing from the result.
+                // 5. Transaction safely aborts with a NOT_FOUND error.
+                //#endregion
+                not_equals: true,
+              },
+            },
           ],
         },
       });
 
       //first -> validation check about the length of the front cart.length & the retrieved cart.length
-      if (products.docs.length !== input.productIds.length) {
+      if (products.totalDocs !== input.productIds.length) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Some products are invalid or do not belong to this tenant!",
+          message: "Products not found",
         });
       }
       //second-> retrieve the tenant to proceed
@@ -246,13 +261,18 @@ export const checkoutRouter = createTRPCRouter({
         collection: "products",
         depth: 2,
         where: {
-          id: {
-            /*
-            here we trying to fetch from database all products has the passed ids from the input
-            note: the ids i got from localstorage through getCartByTenant()
-            */
-            in: input.ids,
-          },
+          and: [
+            {
+              id: {
+                in: input.ids,
+              },
+            },
+            {
+              isArchived: {
+                not_equals: true,
+              },
+            },
+          ],
         },
       });
 

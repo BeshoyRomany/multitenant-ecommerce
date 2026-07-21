@@ -13,7 +13,6 @@ export const useSyncCart = (tenantSlug: string) => {
       { ids: cart.productIds },
       {
         staleTime: 0,
-        // enabled: cart.productIds.length > 0,
       },
     ),
   );
@@ -26,6 +25,9 @@ export const useSyncCart = (tenantSlug: string) => {
       toast.info(
         `Cart updated. ${missingCount} unavailable item${missingCount > 1 ? "s" : ""} removed.`,
       );
+
+      // if the remaining (availableIds) doesn't match (cart.productIds) clear the cart (cart.productIds store)
+      // then make exactly like (availableIds)
       cart.productIds.forEach((id) => {
         if (!availableIds.includes(id)) {
           cart.removeProduct(id);

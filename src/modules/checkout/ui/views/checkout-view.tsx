@@ -1,7 +1,8 @@
 "use client";
 import { generateTenantURL } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { InboxIcon, LoaderIcon } from "lucide-react";
+import { InboxIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -66,13 +67,7 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
   ]);
 
   if (isLoading) {
-    return (
-      <div className="pt-4 px-4 lg:px-12 lg:pt-16">
-        <div className="border border-black flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
-          <LoaderIcon className="text-muted-foreground animate-spin" />
-        </div>
-      </div>
-    );
+    return <CheckoutViewSkeleton />;
   }
 
   if (totalDocs === 0) {
@@ -113,6 +108,64 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
             isCanceled={states.cancel}
             disabled={purchase.isPending}
           />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const CheckoutViewSkeleton = () => {
+  return (
+    <div className="pt-4 px-4 lg:px-12 lg:pt-16">
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 lg:gap-16">
+        {/* Left Side: Checkout Items Skeleton */}
+        <div className="lg:col-span-4">
+          <div className="border rounded-md overflow-hidden bg-white">
+            {Array.from({ length: 3 }).map((_, i, arr) => (
+              <div
+                key={i}
+                className={cn(
+                  "grid grid-cols-[8.5rem_1fr_auto] gap-4 pr-4 border-b",
+                  i === arr.length - 1 && "border-b-0",
+                )}
+              >
+                {/* Image Skeleton */}
+                <div className="overflow-hidden border-r">
+                  <div className="aspect-square h-full bg-slate-200 animate-pulse" />
+                </div>
+
+                {/* Product & Tenant Info Skeleton */}
+                <div className="p-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="h-4 w-3/4 bg-slate-200 animate-pulse rounded" />
+                    <div className="h-3.5 w-1/2 bg-slate-200 animate-pulse rounded" />
+                  </div>
+                </div>
+
+                {/* Price & Remove Button Skeleton */}
+                <div className="p-4 flex flex-col justify-between items-end">
+                  <div className="h-4 w-16 bg-slate-200 animate-pulse rounded" />
+                  <div className="h-4 w-12 bg-slate-200 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side: Checkout Sidebar Skeleton */}
+        <div className="lg:col-span-3">
+          <div className="border rounded-md overflow-hidden bg-white flex flex-col">
+            {/* Total Row */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="h-6 w-12 bg-slate-200 animate-pulse rounded" />
+              <div className="h-6 w-20 bg-slate-200 animate-pulse rounded" />
+            </div>
+
+            {/* Button Container */}
+            <div className="p-4 flex items-center justify-center">
+              <div className="h-11 w-full bg-slate-200 animate-pulse rounded-md" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

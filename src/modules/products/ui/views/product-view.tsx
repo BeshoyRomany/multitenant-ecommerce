@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-
+import { RichText } from "@payloadcms/richtext-lexical/react";
 const CartButton = dynamic(
   () => import("../components/cart-button").then((mod) => mod.CartButton),
   {
@@ -103,9 +103,7 @@ export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
 
             <div className="p-6">
               {data.description ? (
-                <p className="font-medium text-muted-foreground italic">
-                  {data.description}
-                </p>
+                <RichText data={data.description} />
               ) : (
                 "No description provided."
               )}
@@ -170,6 +168,99 @@ export const ProductView = ({ productId, tenantSlug }: ProductViewProps) => {
                       <div className="font-medium">
                         {data.ratingDistribution[star]}%
                       </div>
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+export const ProductViewSkeleton = () => {
+  return (
+    <div className="px-4 py-10 lg:px-12">
+      <div className="border rounded-sm bg-white overflow-hidden">
+        {/* Shimmer effect for the cover image placeholder */}
+        <div className="relative aspect-[3.9] border-b bg-slate-200 animate-pulse" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-6">
+          <div className="lg:col-span-4">
+            {/* Title Skeleton */}
+            <div className="p-6">
+              <div className="h-10 w-2/3 bg-slate-200 animate-pulse rounded-md" />
+            </div>
+
+            {/* Price & Vendor Bar Skeleton */}
+            <div className="border-y flex">
+              <div className="px-6 py-4 flex items-center justify-center border-r">
+                <div className="h-8 w-20 bg-slate-200 animate-pulse rounded-md" />
+              </div>
+
+              <div className="px-6 py-4 flex items-center justify-center lg:border-r">
+                <div className="flex items-center gap-2">
+                  <div className="size-5 rounded-full bg-slate-200 animate-pulse shrink-0 border" />
+                  <div className="h-5 w-28 bg-slate-200 animate-pulse rounded-md" />
+                </div>
+              </div>
+
+              <div className="hidden lg:flex px-6 py-4 items-center justify-center">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-24 bg-slate-200 animate-pulse rounded-md" />
+                  <div className="h-5 w-20 bg-slate-200 animate-pulse rounded-md" />
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Star Rating Skeleton */}
+            <div className="block lg:hidden px-6 py-4 items-center justify-center border-b">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-24 bg-slate-200 animate-pulse rounded-md" />
+                <div className="h-5 w-20 bg-slate-200 animate-pulse rounded-md" />
+              </div>
+            </div>
+
+            {/* Content Skeleton */}
+            <div className="p-6 space-y-3">
+              <div className="h-4 w-full bg-slate-200 animate-pulse rounded-md" />
+              <div className="h-4 w-5/6 bg-slate-200 animate-pulse rounded-md" />
+              <div className="h-4 w-4/6 bg-slate-200 animate-pulse rounded-md" />
+            </div>
+          </div>
+
+          {/* Right Sidebar Skeleton */}
+          <div className="col-span-2">
+            <div className="border-t lg:border-t-0 lg:border-l w-full">
+              {/* Cart Button & Refund Policy Skeleton */}
+              <div className="flex flex-col gap-4 p-6 border-b">
+                <div className="flex flex-row items-center gap-2">
+                  <div className="h-10 flex-1 bg-slate-200 animate-pulse rounded-md border" />
+                  <div className="size-12 bg-slate-200 animate-pulse rounded-md shrink-0 border" />
+                </div>
+                <div className="h-5 w-40 bg-slate-200 animate-pulse rounded-md mx-auto" />
+              </div>
+
+              {/* Ratings & Breakdown Skeleton */}
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="h-6 w-20 bg-slate-200 animate-pulse rounded-md" />
+                  <div className="h-5 w-32 bg-slate-200 animate-pulse rounded-md" />
+                </div>
+
+                {/* Star Progress Bars Grid */}
+                <div className="grid grid-cols-[auto_1fr_auto] gap-3 mt-4 items-center">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Fragment key={i}>
+                      <div className="h-4 w-12 bg-slate-200 animate-pulse rounded-md" />
+
+                      {/* Exact Progress Bar Style Container */}
+                      <div className="relative w-full overflow-hidden rounded-full border bg-white h-lh">
+                        <div className="h-full w-full bg-slate-200 animate-pulse" />
+                      </div>
+
+                      <div className="h-4 w-8 bg-slate-200 animate-pulse rounded-md" />
                     </Fragment>
                   ))}
                 </div>

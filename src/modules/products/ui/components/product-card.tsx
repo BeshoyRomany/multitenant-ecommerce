@@ -79,6 +79,37 @@ export const ProductCard = ({
   );
 };
 
-export const ProductCardSkeleton = () => (
-  <div className="w-full aspect-3/4 bg-neutral-200 rounded-lg animate-pulse"></div>
-);
+export const ProductCardSkeleton = () => {
+  return (
+    <div className="border rounded-md bg-white overflow-hidden h-full flex flex-col">
+      {/* 1. Square Image Placeholder */}
+      <div className="relative aspect-square bg-slate-200 animate-pulse border-b" />
+
+      {/* 2. Main Content Placeholder (Title, Tenant, Rating) */}
+      <div className="p-4 border-b flex flex-col gap-3 flex-1">
+        {/* Title Placeholder */}
+        <div className="space-y-1.5">
+          <div className="h-4 w-5/6 bg-slate-200 animate-pulse rounded" />
+          <div className="h-4 w-1/2 bg-slate-200 animate-pulse rounded" />
+        </div>
+
+        {/* Tenant Avatar + Slug Placeholder */}
+        <div className="flex items-center gap-2">
+          <div className="size-4 rounded-full bg-slate-200 animate-pulse shrink-0" />
+          <div className="h-3.5 w-20 bg-slate-200 animate-pulse rounded" />
+        </div>
+
+        {/* Star Rating Placeholder */}
+        <div className="flex items-center gap-1 mt-auto pt-1">
+          <StarIcon className="size-3.5 text-slate-300 fill-slate-300 animate-pulse" />
+          <div className="h-3.5 w-12 bg-slate-200 animate-pulse rounded" />
+        </div>
+      </div>
+
+      {/* 3. Price Badge Placeholder */}
+      <div className="p-4">
+        <div className="px-2 py-1 border border-slate-200 bg-slate-200 animate-pulse w-16 h-7 rounded-none" />
+      </div>
+    </div>
+  );
+};

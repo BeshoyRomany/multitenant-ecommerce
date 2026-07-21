@@ -63,6 +63,32 @@ export const ProductCard = ({
   );
 };
 
-export const ProductCardSkeleton = () => (
-  <div className="w-full aspect-3/4 bg-neutral-200 rounded-lg animate-pulse"></div>
-);
+export const ProductCardSkeleton = () => {
+  return (
+    <div className="border rounded-md bg-white overflow-hidden h-full flex flex-col">
+      {/* 1. Square Image Skeleton */}
+      <div className="relative aspect-square bg-slate-200 animate-pulse border-b" />
+
+      {/* 2. Content Skeleton matching p-4 border-y flex flex-col gap-3 flex-1 */}
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        {/* Title Lines */}
+        <div className="space-y-1.5">
+          <div className="h-4 w-5/6 bg-slate-200 animate-pulse rounded" />
+          <div className="h-4 w-1/2 bg-slate-200 animate-pulse rounded" />
+        </div>
+
+        {/* Tenant Avatar & Slug Placeholder */}
+        <div className="flex items-center gap-2">
+          <div className="size-4 rounded-full bg-slate-200 animate-pulse shrink-0" />
+          <div className="h-3.5 w-20 bg-slate-200 animate-pulse rounded" />
+        </div>
+
+        {/* Star Rating Placeholder using exact size-3.5 StarIcon */}
+        <div className="flex items-center gap-1 mt-auto pt-1">
+          <StarIcon className="size-3.5 text-slate-300 fill-slate-300 animate-pulse" />
+          <div className="h-3.5 w-12 bg-slate-200 animate-pulse rounded" />
+        </div>
+      </div>
+    </div>
+  );
+};
