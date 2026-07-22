@@ -11,7 +11,6 @@ interface Props {
 export const CartButton = ({ tenantSlug, productId, isPurchased }: Props) => {
   //toggleProduct memoized to not re-render this component twice
   const cart = useCart(tenantSlug);
-  console.log(isPurchased);
   if (isPurchased) {
     return (
       <Button

@@ -6,7 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function generateTenantURL(tenantSlug: string): string {
-  return `/tenants/${tenantSlug}`;
+  //In development mode use normal routing
+  if (process.env.NODE_ENV === "development") {
+    return `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${tenantSlug}`;
+  }
+
+  let protocol = "https";
+  const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
+
+  //In production use subdomain https://beshoy.sellroad.com
+  return `${protocol}://${tenantSlug}.${domain}`;
 }
 
 export function formatCurrency(value: number | string) {
