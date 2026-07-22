@@ -10,6 +10,7 @@ import z from "zod";
 import { CheckoutMetaData, ProductMetaData } from "../types";
 import { stripe } from "@/lib/stripe";
 import { PLATFORM_FEE_PERCENTAGE } from "@/constants";
+import { generateTenantURL } from "@/lib/utils";
 
 export const checkoutRouter = createTRPCRouter({
   //user will verify his Strip account
@@ -199,6 +200,8 @@ export const checkoutRouter = createTRPCRouter({
         (totalAmount * PLATFORM_FEE_PERCENTAGE) / 100,
       );
 
+      const domain = generateTenantURL(input.tenantSlug);
+
       // Create a new Stripe Checkout session
       const checkout = await stripe.checkout.sessions.create(
         {
@@ -206,10 +209,12 @@ export const checkoutRouter = createTRPCRouter({
           customer_email: ctx.session.user.email,
 
           // The URL redirect after a successful payment
-          success_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?success=true`,
+          success_url: `${domain}/checkout?success=true`,
+          // success_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?success=true`,
 
           // The URL redirect if the customer cancels or closes the payment page
-          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?cancel=true`,
+          cancel_url: `${domain}/checkout?cancel=true`,
+          // cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${input.tenantSlug}/checkout?cancel=true`,
 
           // The payment mode (one-time payment, not a recurring subscription)
           mode: "payment",
