@@ -1,8 +1,7 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import { Footer } from "@/modules/tenants/ui/components/footer";
 import { Navbar, NavbarSkeleton } from "@/modules/tenants/ui/components/navbar";
-import { caller, HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { Suspense } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;

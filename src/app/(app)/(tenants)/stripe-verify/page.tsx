@@ -14,7 +14,7 @@ const Page = () => {
       onSuccess: (data) => {
         window.location.href = data.url;
       },
-      onError: (error) => {
+      onError: () => {
         //if unauthorized user it will redirect him to the root page because this is protectedProcedure
         window.location.href = "/";
       },

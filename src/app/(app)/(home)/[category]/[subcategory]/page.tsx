@@ -4,6 +4,7 @@ import { ProductListView } from "@/modules/products/ui/views/product-list-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { SearchParams } from "nuqs/server";
 
+export const dynamic = "force-dynamic";
 interface Props {
   params: Promise<{
     subcategory: string; // This should be subcategory instead of category, as we are in the [subcategory] page

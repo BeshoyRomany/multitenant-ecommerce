@@ -11,7 +11,7 @@ export function generateTenantURL(tenantSlug: string): string {
     return `${process.env.NEXT_PUBLIC_APP_URL}/tenants/${tenantSlug}`;
   }
 
-  let protocol = "https";
+  const protocol = "https";
   const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
   //In production use subdomain https://beshoy.sellroad.com
