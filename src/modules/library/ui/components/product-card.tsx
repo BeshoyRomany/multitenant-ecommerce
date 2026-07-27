@@ -20,7 +20,6 @@ export const ProductCard = ({
   tenantImageUrl,
   reviewCount,
   reviewRating,
-  price,
 }: ProductCardProps) => {
   return (
     <Link prefetch href={`/library/${id}`}>

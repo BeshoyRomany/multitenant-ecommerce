@@ -1,6 +1,5 @@
 import { isSuperAdmin } from "@/lib/access";
-import { Tenant } from "@/payload-types";
-import type { CollectionConfig, Where } from "payload";
+import type { CollectionConfig } from "payload";
 
 export const Orders: CollectionConfig = {
   slug: "orders",

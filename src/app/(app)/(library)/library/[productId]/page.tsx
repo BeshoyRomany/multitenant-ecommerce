@@ -4,7 +4,7 @@ import {
 } from "@/modules/library/ui/views/product-view";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { Suspense } from "react";
-
+export const dynamic = "force-dynamic";
 interface Props {
   params: Promise<{ productId: string }>;
 }
