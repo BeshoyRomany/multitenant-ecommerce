@@ -8,6 +8,9 @@ export const useCheckoutState = () => {
     cancel: parseAsBoolean.withDefault(false).withOptions({
       clearOnDefault: true,
     }),
+    fromCheckout: parseAsBoolean.withDefault(false).withOptions({
+      clearOnDefault: true,
+    }),
   });
 };
 

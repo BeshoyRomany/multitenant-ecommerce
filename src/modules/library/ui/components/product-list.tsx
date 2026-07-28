@@ -6,10 +6,14 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { InboxIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ProductCard, ProductCardSkeleton } from "./product-card";
+import { useCheckoutState } from "@/modules/checkout/hooks/use-checkout-states";
 
 const MAX_POLLING_ATTEMPTS = 8; // ~16 seconds at 2s intervals
 
 export const ProductList = () => {
+  const [states] = useCheckoutState();
+  const isFromCheckout = states.fromCheckout;
+
   const trpc = useTRPC();
   const {
     data,
@@ -22,41 +26,38 @@ export const ProductList = () => {
       { limit: DEFAULT_PAGINATION_LIMIT },
       {
         getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
-        //#region Polling to handle Stripe webhook race condition
         refetchInterval: (query) => {
           const hasProducts = query.state.data?.pages?.[0]?.docs?.length ?? 0;
           return hasProducts > 0 ? false : 2000;
         },
-        //#endregion
       },
     ),
   );
 
   const hasProducts = (data?.pages?.[0]?.docs.length ?? 0) > 0;
 
-  //#region Track polling attempts to show skeleton instead of "empty" while waiting
   const attemptsRef = useRef(0);
-  const [isPollingExhausted, setIsPollingExhausted] = useState(false);
+  const [isPollingExhausted, setIsPollingExhausted] = useState(!isFromCheckout);
 
+  // Only track polling attempts when arriving right after a successful checkout.
+  // The webhook that creates the Order in the DB travels through a separate
+  // Stripe → server request, so it may not have arrived yet when this page loads.
+  // This counts each refetch attempt (via dataUpdatedAt) until either the product
+  // shows up (hasProducts) or we give up after MAX_POLLING_ATTEMPTS.
   useEffect(() => {
-    if (hasProducts) return; // stop tracking once we have data
+    if (!isFromCheckout) return;
+    if (hasProducts) return;
 
     attemptsRef.current += 1;
     if (attemptsRef.current >= MAX_POLLING_ATTEMPTS) {
       setIsPollingExhausted(true);
     }
-    // dataUpdatedAt changes every time a refetch completes (even if data is the same),
-    // so this effect re-runs on every polling cycle.
-  }, [dataUpdatedAt, hasProducts]);
-  //#endregion
+  }, [dataUpdatedAt, hasProducts, isFromCheckout]);
 
   if (!hasProducts) {
-    // Still polling and haven't given up yet → show skeleton, not "empty"
     if (!isPollingExhausted) {
       return <ProductListSkeleton />;
     }
-
-    // Genuinely empty (polling exhausted, still no products)
     return (
       <div className="border border-black flex items-center justify-center p-8 flex-col gap-y-4 bg-white w-full rounded-lg">
         <InboxIcon />
