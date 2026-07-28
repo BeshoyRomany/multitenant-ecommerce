@@ -11,7 +11,7 @@ import { useCheckoutState } from "@/modules/checkout/hooks/use-checkout-states";
 const MAX_POLLING_ATTEMPTS = 8; // ~16 seconds at 2s intervals
 
 export const ProductList = () => {
-  const [states] = useCheckoutState();
+  const [states, setStates] = useCheckoutState();
   const isFromCheckout = states.fromCheckout;
 
   const trpc = useTRPC();
@@ -39,11 +39,13 @@ export const ProductList = () => {
   const attemptsRef = useRef(0);
   const [isPollingExhausted, setIsPollingExhausted] = useState(!isFromCheckout);
 
-  // Only track polling attempts when arriving right after a successful checkout.
+  //#region track the products list query in the library after purchase
+  //  Only track polling attempts when arriving right after a successful checkout.
   // The webhook that creates the Order in the DB travels through a separate
   // Stripe → server request, so it may not have arrived yet when this page loads.
   // This counts each refetch attempt (via dataUpdatedAt) until either the product
   // shows up (hasProducts) or we give up after MAX_POLLING_ATTEMPTS.
+  //#endregion
   useEffect(() => {
     if (!isFromCheckout) return;
     if (hasProducts) return;
@@ -53,6 +55,16 @@ export const ProductList = () => {
       setIsPollingExhausted(true);
     }
   }, [dataUpdatedAt, hasProducts, isFromCheckout]);
+
+  //#region Clear fromCheckout once the product actually shows up
+  // Prevents the polling logic from re-running on refresh/back-navigation
+  // after the purchase has already been confirmed.
+  //#endregion
+  useEffect(() => {
+    if (isFromCheckout && hasProducts) {
+      setStates({ fromCheckout: false });
+    }
+  }, [isFromCheckout, hasProducts, setStates]);
 
   if (!hasProducts) {
     if (!isPollingExhausted) {
