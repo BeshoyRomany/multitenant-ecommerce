@@ -13,6 +13,9 @@ export const generateAuthCookie = async ({ prefix, value }: Props) => {
     path: "/",
     sameSite: "none",
     domain: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+    // secure:false in dev + sameSite:"none" = browser rejects the cookie entirely
+    // (Chrome/modern browsers require Secure when SameSite is "none")
+    // this will cause login to silently fail in development ("not logged in" even after sign-in)
     secure: process.env.NODE_ENV === "production",
   });
 };
