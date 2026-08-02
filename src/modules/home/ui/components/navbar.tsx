@@ -84,7 +84,7 @@ export const Navbar = () => {
             <div className="hidden lg:flex">
               <Button
                 asChild
-                className="border-l border-t-0 border-b-0 border-r-0 px-12 rounded-none h-full bg-pink-400 text-white hover:bg-black hover:text-white transition-colors text-lg"
+                className="border-l border-t-0 border-b-0 border-r-0 px-12 rounded-none h-full bg-pink-400 text-black hover:bg-black hover:text-white transition-colors text-lg"
               >
                 <Link
                   href={generateTenantURL(

@@ -43,7 +43,7 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
         // handle tRPC Error
         if (error.data?.code === "UNAUTHORIZED") {
           //TODO: Modify when subdomains enabled
-          router.push("/sign-in");
+          window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/sign-in`;
         }
         toast.error(error.message);
       },
