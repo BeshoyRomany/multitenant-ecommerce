@@ -22,6 +22,7 @@
     "@payloadcms/payload-cloud": "^3.84.1",
     "@payloadcms/plugin-multi-tenant": "3.84.1",
     "@payloadcms/richtext-lexical": "3.84.1",
+    "@payloadcms/storage-vercel-blob": "3.84.1",
     "@tanstack/react-query": "^5.101.4",
     "@trpc/client": "11.0.3",
     "@trpc/server": "11.0.3",
