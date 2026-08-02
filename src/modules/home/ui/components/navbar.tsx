@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Poppins } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn, generateTenantURL } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { NavbarSidebar } from "./navbar-sidebar";
@@ -72,14 +72,32 @@ export const Navbar = () => {
           ))}
         </div>
         {session.data?.user ? (
-          <div className="hidden lg:flex">
-            <Button
-              asChild
-              className="border-l border-t-0 border-b-0 border-r-0 px-12 rounded-none h-full bg-black text-white hover:bg-pink-400 hover:text-black transition-colors text-lg"
-            >
-              <Link href="/admin">Dashboard</Link>
-            </Button>
-          </div>
+          <>
+            <div className="hidden lg:flex">
+              <Button
+                asChild
+                className="border-l border-t-0 border-b-0 border-r-0 px-12 rounded-none h-full bg-black text-white hover:bg-pink-400 hover:text-black transition-colors text-lg"
+              >
+                <Link href="/admin">Dashboard</Link>
+              </Button>
+            </div>
+            <div className="hidden lg:flex">
+              <Button
+                asChild
+                className="border-l border-t-0 border-b-0 border-r-0 px-12 rounded-none h-full bg-pink-400 text-white hover:bg-black hover:text-white transition-colors text-lg"
+              >
+                <Link
+                  href={generateTenantURL(
+                    typeof session.data?.user?.tenants?.[0]?.tenant === "object"
+                      ? session.data.user.tenants[0].tenant.slug
+                      : (session.data?.user?.tenants?.[0]?.tenant ?? ""),
+                  )}
+                >
+                  My Tenant
+                </Link>
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="hidden lg:flex">
             <Button
