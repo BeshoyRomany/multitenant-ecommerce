@@ -55,16 +55,9 @@ export const CheckoutView = ({ tenantSlug }: CheckoutViewProps) => {
       // setStates({ success: false, cancel: false });
       clearCart();
       queryClient.invalidateQueries(trpc.library.getMany.infiniteQueryFilter());
-      router.push("/library?fromCheckout=true");
+      window.location.href = `${process.env.NEXT_PUBLIC_APP_URL}/library?fromCheckout=true`;
     }
-  }, [
-    states.success,
-    clearCart,
-    setStates,
-    router,
-    queryClient,
-    trpc.library.getMany,
-  ]);
+  }, [states.success, clearCart, setStates, queryClient, trpc.library.getMany]);
 
   if (isLoading) {
     return <CheckoutViewSkeleton />;
