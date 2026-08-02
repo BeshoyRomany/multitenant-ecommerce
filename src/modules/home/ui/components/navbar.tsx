@@ -72,7 +72,7 @@ export const Navbar = () => {
           ))}
         </div>
         {session.data?.user ? (
-          <>
+          <div className="flex">
             <div className="hidden lg:flex">
               <Button
                 asChild
@@ -97,7 +97,7 @@ export const Navbar = () => {
                 </Link>
               </Button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="hidden lg:flex">
             <Button
