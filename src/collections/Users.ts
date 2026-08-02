@@ -53,7 +53,33 @@ export const Users: CollectionConfig = {
     useAsTitle: "email",
     hidden: ({ user }) => !isSuperAdmin(user), // Only super-admin role can see the users collection
   },
-  auth: true,
+  auth: {
+    //#region Why this must match generateAuthCookie's settings exactly
+    // Payload has its own built-in cookie logic for auth (this config), separate
+    // from the custom `generateAuthCookie` util used in the tRPC login procedure.
+    // Both can end up setting/reading the same auth cookie, so their settings
+    // (domain, sameSite, secure) must be IDENTICAL.
+    //
+    // If they mismatch (e.g. one has the "." domain prefix and the other doesn't),
+    // login/logout across subdomains can behave inconsistently — in particular,
+    // clearing a cookie requires an exact match on its domain; a mismatched domain
+    // means the browser won't find the cookie to delete it, so logout can silently
+    // fail to actually remove the session.
+    //#endregion
+    cookies: {
+      ...(process.env.NODE_ENV !== "development" && {
+        sameSite: "None",
+        // Must prefix with "." so the cookie is shared across ALL subdomains
+        // (beshoy.sellroad.shop, john.sellroad.shop, sellroad.shop itself),
+        // not scoped to a single host only.
+        domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+        // secure:false in dev + sameSite:"none" = browser rejects the cookie entirely
+        // (Chrome/modern browsers require Secure when SameSite is "none")
+        // this will cause login to silently fail in development ("not logged in" even after sign-in)
+        secure: true,
+      }),
+    },
+  },
   fields: [
     {
       name: "username",
