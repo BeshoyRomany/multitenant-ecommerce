@@ -30,7 +30,8 @@ export const Tenants: CollectionConfig = {
         update: ({ req: { user } }) => isSuperAdmin(user),
       },
       admin: {
-        description: "This is subdomain for the store (e.q [slug].sellroad.com",
+        description:
+          "This is subdomain for the store (e.q [slug].sellroad.shop",
       },
     },
     {

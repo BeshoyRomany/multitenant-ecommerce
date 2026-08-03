@@ -156,7 +156,7 @@ const seed = async () => {
   await payload.create({
     collection: "users",
     data: {
-      email: "admin@sellroad.com",
+      email: "admin@sellroad.shop",
       password: "demo",
       username: "admin",
       roles: ["super-admin"],

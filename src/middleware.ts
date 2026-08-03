@@ -33,18 +33,18 @@ export default async function middleware(req: NextRequest) {
   // req.nextUrl.basePath   → e.g. ""    (if app is served under a subpath)
   //#endregion
   const url = req.nextUrl;
-  //Extract the hostname (e.q., "beshoy.sellroad.com" or "john.sellroad.com" or "beshoy.localhost:3002")
+  //Extract the hostname (e.q., "beshoy.sellroad.shop" or "john.sellroad.shop" or "beshoy.localhost:3002")
   const hostname = req.headers.get("host") || "";
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || ""; //rootDomain localhost:3002
 
   if (hostname.endsWith(`.${rootDomain}`)) {
-    //domainName -> localhost:3002 || "sellroad.com"
+    //domainName -> localhost:3002 || "sellroad.shop"
 
-    // checks about (the end of the hostname) and replace from (.sellroad.com || .localhost:3002) with -> ""
+    // checks about (the end of the hostname) and replace from (.sellroad.shop || .localhost:3002) with -> ""
     const tenantSlug = hostname.replace(`.${rootDomain}`, "");
 
     // TODO: Add subdomain exceptions for `www`, `admin`, `api` etc. before going to production
-    // e.g. www.sellroad.com should NOT be rewritten to /tenants/www
+    // e.g. www.sellroad.shop should NOT be rewritten to /tenants/www
 
     return NextResponse.rewrite(
       //#region new URL(path, req.url OR req.nextUrl.origin) — transformation walkthrough

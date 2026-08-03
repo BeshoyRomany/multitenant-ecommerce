@@ -108,9 +108,9 @@ const Page = () => {
                 ✉️ EMAIL US
               </h2>
               <p className="text-lg font-bold text-black">
-                hello@sellroad.com
+                hello@sellroad.shop
                 <br />
-                support@sellroad.com
+                support@sellroad.shop
               </p>
             </Card>
 
