@@ -175,13 +175,14 @@ export const productsRouter = createTRPCRouter({
   getMany: baseProcedure
     .input(
       z.object({
+        search: z.string().nullable().optional(), //passed from the component as ...filters
+        minPrice: z.string().nullable().optional(), //passed from the component as ...filters
+        maxPrice: z.string().nullable().optional(), //passed from the component as ...filters
+        tags: z.array(z.string()).nullable().optional(), //passed from the component as ...filters
+        sort: z.enum(sortValues).nullable().optional(), //passed from the component as ...filters
         cursor: z.number().default(1),
         limit: z.number().default(DEFAULT_PAGINATION_LIMIT),
         category: z.string().nullable().optional(),
-        minPrice: z.string().nullable().optional(),
-        maxPrice: z.string().nullable().optional(),
-        tags: z.array(z.string()).nullable().optional(),
-        sort: z.enum(sortValues).nullable().optional(),
         tenantSlug: z.string().nullable().optional(), //TODO: will send from subdomain
       }),
     )
@@ -300,6 +301,13 @@ export const productsRouter = createTRPCRouter({
       if (input.tags && input.tags.length > 0) {
         where["tags.name"] = {
           in: input.tags,
+        };
+      }
+
+      //Search params
+      if (input.search) {
+        where["name"] = {
+          like: input.search,
         };
       }
 
