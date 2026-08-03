@@ -17,7 +17,7 @@ export function generateTenantURL(tenantSlug: string): string {
   const protocol = "https";
   const domain = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
-  //In production use subdomain https://beshoy.sellroad.com
+  //In production use subdomain https://beshoy.sellroad.shop
   return `${protocol}://${tenantSlug}.${domain}`;
 }
 

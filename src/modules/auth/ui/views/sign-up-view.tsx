@@ -110,7 +110,7 @@ export const SignupView = () => {
                     >
                       Your store will be available at&nbsp;
                       {/* TODO: Use a proper method to generate url */}
-                      <strong>{username}</strong>.sellroad.com
+                      <strong>{username}</strong>.sellroad.shop
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

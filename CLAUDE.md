@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A multi-tenant e-commerce platform (Payload CMS 3 + Next.js 15 App Router). Each tenant is a "store" (e.g. `sellroad.com` style branding, though tenants currently route by path, not subdomain — see Routing below). Sellers register, get a tenant + Stripe Connect account, list products, and buyers check out per-tenant carts via Stripe Checkout.
+A multi-tenant e-commerce platform (Payload CMS 3 + Next.js 15 App Router). Each tenant is a "store" (e.g. `sellroad.shop` style branding, though tenants currently route by path, not subdomain — see Routing below). Sellers register, get a tenant + Stripe Connect account, list products, and buyers check out per-tenant carts via Stripe Checkout.
 
 ## Commands
 
@@ -85,7 +85,7 @@ Modules: `auth`, `categories`, `checkout`, `home`, `library`, `products`, `revie
 ### Checkout & payments (Stripe Connect)
 
 - Cart state is client-only: `zustand` store (`src/modules/checkout/store/use-cart-store.ts`) persisted to `localStorage`, keyed **per tenant slug** (`tenantCarts: Record<tenantSlug, { productIds }>`) since a cart can only contain one tenant's products at checkout time.
-- `checkoutRouter.purchase` (protected) re-fetches products server-side by ID *and* tenant slug to prevent client-side price/tenant tampering, then creates a Stripe Checkout Session with `metadata.stripeAccountId` per line item (Stripe Connect destination charges pattern).
+- `checkoutRouter.purchase` (protected) re-fetches products server-side by ID _and_ tenant slug to prevent client-side price/tenant tampering, then creates a Stripe Checkout Session with `metadata.stripeAccountId` per line item (Stripe Connect destination charges pattern).
 - `checkoutRouter.getProducts` (public) resolves cart product IDs to full product docs + computed `totalPrice` for rendering the cart sidebar.
 - Successful purchases are expected to be recorded into the `Orders` collection via the Stripe webhook handler (`src/app/api/stripe/webhooks/route.ts`), linking `user` + `product` + `stripeCheckoutSessionId`.
 

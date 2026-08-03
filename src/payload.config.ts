@@ -97,6 +97,7 @@ export default buildConfig({
       // #endregion
       collections: {
         products: {}, // will add tenant Field into the "products" collection
+        media: {}, // will add tenant Field into the "media" collection
       },
       tenantsArrayField: {
         includeDefaultField: false /* false here 
