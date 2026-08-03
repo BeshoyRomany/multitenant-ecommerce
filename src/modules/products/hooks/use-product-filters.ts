@@ -6,6 +6,7 @@ import {
 } from "nuqs";
 const sortValues = ["curated", "trending", "hot_and_new"] as const;
 const params = {
+  search: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   sort: parseAsStringLiteral(sortValues).withDefault("curated"),
   minPrice: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   maxPrice: parseAsString.withDefault("").withOptions({ clearOnDefault: true }),

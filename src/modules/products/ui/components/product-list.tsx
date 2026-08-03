@@ -19,6 +19,7 @@ export const ProductList = ({ category, tenantSlug, narrowView }: Props) => {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery(
       trpc.products.getMany.infiniteQueryOptions(
+        //Any change in the filters will re-trigger the query
         { ...filters, category, tenantSlug, limit: DEFAULT_PAGINATION_LIMIT },
         {
           getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined, // React Query will load the next page 2,3,4 etc..
