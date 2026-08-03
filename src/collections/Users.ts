@@ -66,19 +66,19 @@ export const Users: CollectionConfig = {
     // means the browser won't find the cookie to delete it, so logout can silently
     // fail to actually remove the session.
     //#endregion
-    cookies: {
-      ...(process.env.NODE_ENV !== "development" && {
-        sameSite: "None",
-        // Must prefix with "." so the cookie is shared across ALL subdomains
-        // (beshoy.sellroad.shop, john.sellroad.shop, sellroad.shop itself),
-        // not scoped to a single host only.
-        domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-        // secure:false in dev + sameSite:"none" = browser rejects the cookie entirely
-        // (Chrome/modern browsers require Secure when SameSite is "none")
-        // this will cause login to silently fail in development ("not logged in" even after sign-in)
-        secure: true,
-      }),
-    },
+    // cookies: {
+    //   ...(process.env.NODE_ENV !== "development" && {
+    //     sameSite: "None",
+    //     // Must prefix with "." so the cookie is shared across ALL subdomains
+    //     // (beshoy.sellroad.shop, john.sellroad.shop, sellroad.shop itself),
+    //     // not scoped to a single host only.
+    //     domain: `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    //     // secure:false in dev + sameSite:"none" = browser rejects the cookie entirely
+    //     // (Chrome/modern browsers require Secure when SameSite is "none")
+    //     // this will cause login to silently fail in development ("not logged in" even after sign-in)
+    //     secure: true,
+    //   }),
+    // },
   },
   fields: [
     {
