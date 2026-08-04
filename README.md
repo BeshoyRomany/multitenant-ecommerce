@@ -27,6 +27,8 @@ Multitenant E-commerce is a complete marketplace platform where sellers register
 
 The entire API surface is **end-to-end type-safe** — a change to a Payload collection field propagates through the tRPC router into React component props with no codegen step and no hand-written API types.
 
+**Design:** This application is designed with **neobrutalism** inspiration — bold typography, stark contrast, raw UI elements, and a no-nonsense aesthetic that emphasizes function over decoration.
+
 ---
 
 ## ✨ Features
