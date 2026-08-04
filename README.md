@@ -1,7 +1,7 @@
 # Multitenant E-commerce Platform
 
 <div align="center">
-  <img src="public/auth-bg.png" alt="Multitenant E-commerce Platform" width="100%" />
+  <img src="public/banner.jpg" alt="Multitenant E-commerce Platform" width="100%" />
 </div>
 
 ---
