@@ -1,154 +1,124 @@
-# Multitenant E-commerce Platform
-
 <div align="center">
-  <img src="public/banner.jpg" alt="Multitenant E-commerce Platform" width="100%" />
+
+<img src="./public/banner.jpg" alt="Multitenant E-commerce Platform" width="100%" />
+
+# 🛍️ Multitenant E-commerce
+
+**Complete multi-tenant marketplace with Stripe Connect payments, automated order processing, and tenant-scoped storefronts.**
+
+<p>
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+  <img alt="React" src="https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img alt="tRPC" src="https://img.shields.io/badge/tRPC-2596BE?style=for-the-badge&logo=trpc&logoColor=white" />
+  <img alt="Payload" src="https://img.shields.io/badge/Payload_CMS-000000?style=for-the-badge&logo=payload&logoColor=white" />
+  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-13AA52?style=for-the-badge&logo=mongodb&logoColor=white" />
+  <img alt="Stripe" src="https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white" />
+  <img alt="Tailwind" src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+</p>
+
 </div>
 
 ---
 
-## 📋 Overview
+## 📖 Overview
 
-A modern, scalable **multi-tenant e-commerce platform** built with cutting-edge technologies. This is a full-stack solution where each seller (tenant) gets their own isolated storefront with complete product management, inventory control, and payment processing through Stripe Connect.
+Multitenant E-commerce is a complete marketplace platform where sellers register, get isolated storefronts, and handle payments through Stripe Connect. The entire system is **multi-tenant by design** — each seller's products, orders, and data are automatically filtered and protected. Buyers browse multiple stores, build per-tenant carts, and checkout securely. Order processing flows through Stripe webhooks with verified, idempotent handling.
 
-**Key Highlights:**
-- 🏪 **Complete multi-tenant isolation** — Each tenant's data is automatically filtered and protected
-- 💳 **Stripe Connect integration** — Secure payments with destination charges per merchant
-- 🔐 **Authentication** — Clerk + Payload CMS built-in auth with role-based access control
-- 📱 **Fully responsive** — Mobile-first design optimized for all devices
-- 🌐 **Bilingual support** — English & Arabic (i18n) built-in
-- 📦 **Product management** — Rich content editor, media library, categories, tags
-- ⭐ **Review system** — Customer reviews from verified purchasers
-- 🛒 **Smart cart** — Per-tenant cart with localStorage persistence
-- 📊 **Admin dashboard** — Payload CMS with tenant isolation and super-admin override
-- 🔒 **Security first** — Server-side validation, ownership verification, trust boundaries
+The entire API surface is **end-to-end type-safe** — a change to a Payload collection field propagates through the tRPC router into React component props with no codegen step and no hand-written API types.
 
 ---
 
-## ⭐ Features
+## ✨ Features
 
-### Multi-Tenant Architecture
-- **Complete data isolation** — Each tenant's products, orders, and content are automatically filtered
-- **Automatic tenant assignment** — Products and orders inherit the active tenant on creation
-- **Tenant-scoped routing** — Each store accessible via `/tenants/[slug]`
-- **User-to-tenant mapping** — Each user can own and manage multiple stores
-- **Super-admin override** — Admins can view and manage all tenants
+### 🏪 Multi-Tenant Storefronts
 
-### Authentication & Authorization
-- **Modern auth** — Clerk integration with social login support
-- **Role-based access control** — Super-admin, Merchant, Buyer roles
-- **Session management** — Payload session tokens with custom access control
-- **Protected procedures** — tRPC protected procedures validate session and user
-- **Multi-tenant user matrix** — Track which tenants each user owns
+- **Complete tenant isolation** — Products, orders, and content are automatically filtered by tenant
+- **Dedicated store URLs** — Each seller's storefront at `/tenants/[slug]`
+- **Automatic tenant assignment** — Products inherit the active tenant on creation
+- **User-to-tenant mapping** — Sellers own and manage their store accounts
+- **Super-admin override** — Platform admins can view and manage all tenants
 
-### Checkout & Payments
+### 💳 Stripe Connect Payments
+
+- **Destination charges** — Each line item routes to the correct merchant's Stripe account
+- **Server-side checkout validation** — Products and prices re-validated before payment
+- **Secure checkout sessions** — Stripe Checkout with full tenant isolation
+- **Webhook order recording** — `checkout.session.completed` creates Orders, tracks purchases
+- **Idempotent webhook handling** — Duplicate deliveries can't corrupt state or orphan orders
+
+### 🛒 Shopping & Cart
+
 - **Per-tenant carts** — Cart state in localStorage, keyed by tenant slug
-- **Server-side validation** — Products and prices re-validated before checkout
-- **Stripe Connect** — Each line item routed to correct merchant via destination charges
-- **Secure checkout sessions** — Stripe Checkout with tenant isolation
-- **Order recording** — Webhooks create Orders linking user + product + Stripe session
+- **Smart cart UI** — Live product counts, prices, and availability
+- **Order history** — Track all purchases with order details
+- **Purchase verification** — Library only shows products the user actually bought
 
-### Content & Media Management
-- **Bilingual CMS** — All labels support English and Arabic
-- **Rich text editor** — Lexical-based editor for product descriptions
-- **Media library** — Integrated with Vercel Blob storage and Sharp optimization
-- **Hierarchical organization** — Categories, subcategories, and tags
-- **Dynamic images** — Automatic optimization and responsive images
+### 📦 Product Management
 
-### Post-Purchase Features
-- **Purchase verification** — Library shows only purchased products
-- **Review system** — Leave reviews only on purchased items
+- **Bilingual CMS** — All labels support English and Arabic (i18n)
+- **Rich content editor** — Lexical-based editor for descriptions
+- **Media library** — Integrated with Vercel Blob + Sharp optimization
+- **Categories & tags** — Hierarchical product organization
+- **Dynamic images** — Automatic optimization, responsive delivery
+
+### ⭐ Post-Purchase Features
+
+- **Review system** — Verified purchasers leave ratings and feedback
+- **Purchase-gated access** — Library and reviews only accessible after buying
+- **Order tracking** — Full transaction history with status
 - **Ownership gates** — Access control based on verified purchases
-- **Order history** — Track all transactions and purchases
 
-### Admin Features
-- **Payload CMS dashboard** — Accessible at `/admin`
-- **Tenant management** — Create, edit, and manage stores
+### 🎛️ Admin Dashboard
+
+- **Payload CMS UI** — Full-featured admin at `/admin`
+- **Tenant management** — Create and configure stores
 - **Product management** — Full CRUD with rich content
-- **User management** — Manage users and roles
+- **User management** — Manage roles and permissions
+- **Order tracking** — View all platform transactions
 - **Stripe verification** — Custom component to verify merchant accounts
-- **Order tracking** — View all orders and transactions
+
+### 🔐 Platform
+
+- **Clerk authentication** — Modern auth with social login
+- **Role-based access** — Super-admin, Merchant, Buyer roles
+- **Session validation** — Protected procedures validate via Payload auth
+- **Server-side trust boundary** — Checkout and library re-validate server-side
+- **Signature-verified webhooks** — Stripe webhook validation and idempotent handling
 
 ---
 
-## 🏗️ Architecture
-
-### Modular by feature
-
-Every feature is self-contained — its tRPC router, derived types, and UI all live together:
-
-```
-src/
-├── app/                          # Next.js routes — thin: prefetch data, render a view
-│   ├── (home)/                   # Feed, search, watch page, playlists, channels
-│   ├── (tenants)/                # Tenant storefronts
-│   ├── (auth)/                   # Clerk sign-in / sign-up
-│   └── api/                      # tRPC handler, webhooks, AI workflows, uploads
-│
-├── modules/<feature>/            # Feature module (domain-organized)
-│   ├── server/procedures.ts      # tRPC router
-│   ├── types.ts                  # Types inferred from router output
-│   └── ui/
-│       ├── views/                # Top-level page components
-│       └── components/           # Domain-specific components
-│
-├── collections/                  # Payload CMS collections (data layer)
-│   ├── Users.ts
-│   ├── Products.ts
-│   ├── Orders.ts
-│   └── ...
-│
-├── db/schema.ts                  # Single source of truth for database schema
-├── trpc/                         # tRPC registry, server caller, client provider
-├── lib/                          # Shared utilities (auth, validation, helpers)
-└── components/ui/               # shadcn/ui primitives
-```
-
----
-
-## 📚 Scripts
-
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start the Next.js dev server + SSL proxy (port 3002) |
-| `bun run next-dev` | Start Next.js dev server only (port 3000) |
-| `bun run build` | Production build (type-check included) |
-| `bun run start` | Serve the production build |
-| `bun run lint` | Run ESLint |
-| `bun run payload:types` | Regenerate types from collections |
-| `bun run payload:migrate:fresh` | Drop and recreate database |
-| `bun run db:seed` | Seed sample data |
-
----
-
-## 🛠️ Tech Stack
+## 🧰 Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| :--- | :--- |
 | **Framework** | Next.js 15 (App Router, React Server Components) |
 | **Language** | TypeScript 5 (strict) |
-| **UI** | React 19, Tailwind CSS 4, shadcn/ui, Radix UI, Lucide |
+| **UI** | React 19, Tailwind CSS, shadcn/ui, Radix UI, Lucide |
 | **API** | tRPC 11 — end-to-end type safety, superjson |
-| **Data fetching** | TanStack React Query 5 (suspense + infinite queries) |
+| **Data fetching** | TanStack Query 5 (suspense + infinite queries) |
 | **Database** | MongoDB via @payloadcms/db-mongodb |
-| **ORM** | Payload CMS 3 + Mongoose |
+| **CMS** | Payload CMS 3 (collections, webhooks, auth) |
+| **Multi-tenancy** | @payloadcms/plugin-multi-tenant (automatic isolation) |
 | **Auth** | Clerk + Payload CMS session management |
-| **Payments** | Stripe Connect (destination charges) |
+| **Payments** | Stripe Connect (destination charges, webhooks) |
 | **File storage** | Vercel Blob + Sharp (image optimization) |
 | **State** | Zustand (cart, theme) |
 | **Forms** | React Hook Form + Zod |
-| **Utilities** | date-fns, clsx, tailwind-merge |
+| **Runtime / PM** | Bun |
+| **Deployment** | Vercel |
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 1. Prerequisites
 
-- **Node.js** 18+ or [Bun](https://bun.sh/)
-- **MongoDB** (local or Atlas)
-- **Stripe account** for payments
+- **Bun** ≥ 1.0 (or Node.js 18+)
+- A **MongoDB** database (local or Atlas)
+- Accounts for **Stripe**, **Clerk**, and **Vercel Blob**
 
-### 1. Clone and install
+### 2. Clone and install
 
 ```bash
 git clone https://github.com/BeshoyRomany/multitenant-ecommerce.git
@@ -156,9 +126,9 @@ cd multitenant-ecommerce
 bun install
 ```
 
-### 2. Environment variables
+### 3. Environment variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```bash
 # App — must match the URL the browser and webhooks actually use
@@ -173,58 +143,107 @@ PAYLOAD_SECRET=your-random-secret-key-here
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Optional: Clerk Auth (if integrating)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 ```
 
-### 3. Initialize the database
+### 4. Set up the database
 
 ```bash
-bun run payload:migrate:fresh
-bun run db:seed
+bun run payload:migrate:fresh   # initialize schema
+bun run db:seed                 # seed sample data
 ```
 
-### 4. Start the dev server
+### 5. Run it
 
 ```bash
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The dev command starts:
+- **Next.js dev server** on `:3000`
+- **SSL proxy** on `:3002` — Required for Stripe webhook testing locally
+
+Open **https://localhost:3002** in your browser.
+
+> **⚠️ Webhooks:** Paste your ngrok public URL into your **Stripe dashboard** (`/api/stripe/webhooks`). Without this, orders won't be recorded and checkouts will stay pending.
+
+To run just the app (without SSL proxy):
+
+```bash
+bun run next-dev
+```
 
 ---
 
-## 📖 Documentation
+## 📜 Scripts
 
-Detailed guides are in:
-- **[CLAUDE.md](./CLAUDE.md)** — Architecture for developers
-- **[MULTITENANT.md](./MULTITENANT.md)** — Multi-tenancy deep dive
-- **[Payload CMS Docs](https://payloadcms.com/docs)** — Official CMS docs
-- **[Next.js Docs](https://nextjs.org/docs)** — Framework docs
-- **[Stripe Docs](https://stripe.com/docs)** — Payment integration
-
----
-
-## 🔐 Security
-
-This project follows these security practices:
-
-- **Trust boundary enforcement** — Checkout and library procedures re-validate server-side
-- **Tenant isolation** — Automatic filtering via Payload multi-tenant plugin
-- **Session validation** — Protected procedures validate via Payload auth
-- **Role-based access** — Collections enforce access based on roles and tenant membership
-- **Environment secrets** — All sensitive keys in `.env.local` (never committed)
-- **HTTPS for webhooks** — SSL proxy on port 3002 for local Stripe webhook testing
+| Command | Description |
+| :--- | :--- |
+| `bun run dev` | Start Next.js + SSL proxy (port 3002) |
+| `bun run next-dev` | Start Next.js dev server only (port 3000) |
+| `bun run build` | Production build (type-check included) |
+| `bun run start` | Serve the production build |
+| `bun run lint` | Run ESLint |
+| `bun run payload:types` | Regenerate types from collections |
+| `bun run payload:migrate:fresh` | Drop and recreate database schema |
+| `bun run db:seed` | Seed sample data (tenants, products, users) |
 
 ---
 
-## 🤝 Contributing
+## 🏗️ Architecture
 
-Contributions are welcome!
+### Modular by feature
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/your-feature`
-3. **Commit** your changes: `git commit -m "feat: describe your change"`
-4. **Push** to the branch: `git push origin feature/your-feature`
-5. **Open** a Pull Request
+Every feature is self-contained — its tRPC router, derived types, and UI all live together:
+
+```
+src/
+├── app/                       # Next.js routes — thin: prefetch data, render a view
+│   ├── (home)/                # Marketplace homepage, categories, browse
+│   ├── (tenants)/             # Tenant storefronts (products, checkout)
+│   ├── (library)/             # Buyer's purchases and reviews
+│   ├── (auth)/                # Sign-in / sign-up
+│   ├── (payload)/             # Payload CMS admin + REST/GraphQL API
+│   └── api/                   # tRPC handler, Stripe webhooks
+├── modules/<feature>/
+│   ├── server/procedures.ts   # tRPC router
+│   ├── types.ts               # types inferred from router output
+│   └── ui/{views,components}
+├── collections/               # Payload CMS collections (Users, Products, Orders, etc)
+├── db/schema.ts               # Single source of truth for database
+├── trpc/                      # Router registry, server caller, client provider
+├── lib/                       # Stripe, Payload, access control helpers
+└── components/ui/             # shadcn/ui primitives
+```
+
+Pages prefetch on the server and hydrate on the client, so storefronts render immediately without a loading waterfall.
+
+### The checkout pipeline
+
+```
+Add to cart (client) → Checkout (user submits) → Server validation
+                    → Stripe Checkout Session created → Payment
+                    → webhook (checkout.session.completed) → Order created
+                    → Order links user + product + Stripe session
+```
+
+The checkout handler is deliberately ordered **validate → create session**: the expensive Stripe call happens *outside* any row lock, and the final write only lands if the order hasn't already been recorded. Duplicate webhook deliveries are therefore safe and never leave orphaned orders behind.
+
+### Multi-tenant isolation
+
+The Payload multi-tenant plugin automatically:
+1. Injects a hidden `tenant` relationship field into products, orders, and tagged collections
+2. Filters all reads/writes to the active tenant on request
+3. Associates new documents with the current tenant on creation
+
+Result: every tRPC procedure inherits tenant filtering automatically — no manual access checks needed.
+
+### Realtime updates
+
+Server events (order confirmations, payment status) are recorded to the database, and the client refetches via **query invalidation** rather than merging the payload into local state. The UI always reflects the database state, so it can never drift out of sync.
 
 ---
 
@@ -236,12 +255,8 @@ Released under the MIT License.
 
 <div align="center">
 
-### Built by [Beshoy Romany](https://github.com/BeshoyRomany)
+**Built by [Beshoy Romany](https://github.com/BeshoyRomany)**
 
 ⭐ If you find this project useful, consider giving it a star!
-
-Made with ❤️ by [Beshoy Romany](https://github.com/BeshoyRomany)
-
-[⬆ Back to Top](#multitenant-e-commerce-platform)
 
 </div>
