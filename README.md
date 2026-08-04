@@ -168,7 +168,11 @@ The dev command starts:
 
 Open **https://localhost:3002** in your browser.
 
-> **⚠️ Webhooks:** Paste your ngrok public URL into your **Stripe dashboard** (`/api/stripe/webhooks`). Without this, orders won't be recorded and checkouts will stay pending.
+> **⚠️ Webhooks:** In another terminal, listen for Stripe events using the Stripe CLI:
+> ```bash
+> stripe listen --forward-to https://localhost:3002/api/stripe/webhooks --skip-verify
+> ```
+> The `--skip-verify` flag is needed because localhost uses a self-signed certificate. Without the webhook listener, orders won't be recorded and checkouts will stay pending.
 
 To run just the app (without SSL proxy):
 
