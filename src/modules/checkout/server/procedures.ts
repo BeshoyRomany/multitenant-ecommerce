@@ -24,6 +24,7 @@ export const checkoutRouter = createTRPCRouter({
     if (!user) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
     }
+
     //2. #region user tenants interface
     /*
       tenants?: {tenant: string | Tenant; id?: string | null}[] | null;
@@ -41,8 +42,29 @@ export const checkoutRouter = createTRPCRouter({
       throw new TRPCError({ code: "NOT_FOUND", message: "Tenant not found" });
     }
 
+    // 4. Handle missing or empty stripeAccountId
+    // If the account was deleted from Stripe and the DB has an empty string, create a new one
+    let stripeAccountId = tenant.stripeAccountId;
+
+    if (!stripeAccountId || stripeAccountId === "") {
+      const newStripeAccount = await stripe.accounts.create({
+        type: "standard",
+      });
+
+      stripeAccountId = newStripeAccount.id;
+
+      // Update the tenant in Payload CMS with the new Stripe Account ID
+      await ctx.db.update({
+        collection: "tenants",
+        id: tenantId,
+        data: {
+          stripeAccountId: stripeAccountId,
+        },
+      });
+    }
+
     const accountLink = await stripe.accountLinks.create({
-      account: tenant.stripeAccountId,
+      account: stripeAccountId, // Use the dynamically resolved stripeAccountId
       // The URL the user is redirected to if the account link expires or the session is interrupted
       refresh_url: `${process.env.NEXT_PUBLIC_APP_URL!}/admin`,
       // The URL the user is sent to once they complete or exit the Stripe onboarding flow
@@ -60,7 +82,6 @@ export const checkoutRouter = createTRPCRouter({
 
     return { url: accountLink.url };
   }),
-
   purchase: protectedProcedure
     .input(
       z.object({
